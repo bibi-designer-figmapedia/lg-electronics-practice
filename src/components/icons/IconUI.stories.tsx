@@ -48,7 +48,8 @@ export const Gallery: Story = {
       {TYPES.map((type) => (
         <div key={type} className="flex flex-col items-center gap-8">
           <IconUI type={type} />
-          <span className="text-12 text-text-secondary">{type}</span>
+          {/* 캡션 라벨 — 기존 story 의 캡션 관례와 같은 합성 클래스다. */}
+          <span className="type-body-small text-text-secondary">{type}</span>
         </div>
       ))}
     </div>

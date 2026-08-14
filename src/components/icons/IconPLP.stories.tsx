@@ -47,7 +47,8 @@ export const Gallery: Story = {
       {NAMES.map((name) => (
         <div key={name} className="flex flex-col items-center gap-8">
           <IconPLP name={name} />
-          <span className="text-12 text-text-secondary">{name}</span>
+          {/* 캡션 라벨 — 기존 story 의 캡션 관례와 같은 합성 클래스다. */}
+          <span className="type-body-small text-text-secondary">{name}</span>
         </div>
       ))}
     </div>

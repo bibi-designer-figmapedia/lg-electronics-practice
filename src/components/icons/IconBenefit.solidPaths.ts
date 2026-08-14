@@ -1,3 +1,5 @@
+import type { BenefitIconName } from './IconBenefit.names'
+
 /**
  * Icon/Benefit — Type=Solid black / Solid white 공용 path 데이터.
  *
@@ -66,14 +68,15 @@ export const BENEFIT_SOLID_GLYPH_FILL_RULE = 'evenodd' as const
  * 배경 위에 얹히는 글리프. 좌표는 각 글리프의 로컬 좌표계다 —
  * 96 좌표계로 옮기려면 benefitSolidGlyphTransforms 를 함께 써야 한다.
  *
- * 키는 IconBenefit.names.ts 의 BenefitIconName 과 1:1 이다. 이 파일은 그 타입을
- * import 하지 않는다 (순환 의존과 작업 충돌을 피하려고 Record<string, string> 로
- * 둔다). 조립하는 쪽에서 satisfies Record<BenefitIconName, string> 로 검증한다.
+ * 키는 IconBenefit.names.ts 의 BenefitIconName 과 1:1 이고, 선언부의
+ * `Record<BenefitIconName, string>` 주석이 그 완전성을 컴파일 타임에 강제한다 —
+ * 키가 하나라도 빠지면 `npm run typecheck` 가 TS2741 로 깨진다(실측 확인).
+ * 형제 데이터 모듈 IconBenefit.linePaths.ts 와 IconUI / IconPLP 도 같은 방식이다.
  *
  * 주석의 이름은 Figma Solid 계열 원본 이름 그대로다. Line 계열과 철자가 다른
  * 항목이 있어 키는 Line 계열 철자를 기준으로 정규화했다.
  */
-export const benefitSolidGlyphPaths: Record<string, string> = {
+export const benefitSolidGlyphPaths: Record<BenefitIconName, string> = {
   // Membership — node 19620:23919
   membership:
     'M24 25.5996C37.248 25.5996 48 35.616 48 48H0C3.31222e-06 35.616 10.752 25.5996 24 25.5996Z M24 0C31.072 0 36.7998 5.376 36.7998 12C36.7998 18.624 31.072 24 24 24C16.9281 23.9999 11.2002 18.6239 11.2002 12C11.2002 5.37606 16.9281 9.90775e-05 24 0Z',
@@ -187,8 +190,10 @@ export const benefitSolidGlyphPaths: Record<string, string> = {
 /**
  * 글리프를 96 좌표계의 제자리로 옮기는 transform. benefitSolidGlyphPaths 와
  * 키가 같다. Figma 글리프 노드의 프레임 내 x / y 를 그대로 옮긴 값이다.
+ *
+ * benefitSolidGlyphPaths 와 같은 방식으로 선언부에서 키 완전성을 검사한다.
  */
-export const benefitSolidGlyphTransforms: Record<string, string> = {
+export const benefitSolidGlyphTransforms: Record<BenefitIconName, string> = {
   membership: 'translate(24 24)',
   vip: 'translate(18.0009765625 27.585159301757812)',
   loyalty: 'translate(19.935546875 24.7998046875)',
