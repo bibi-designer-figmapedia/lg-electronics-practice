@@ -1,0 +1,172 @@
+/*
+ * Color tokens — extracted from Figma.
+ *
+ * Source: https://www.figma.com/design/Ma09rS3GL9ahAGRADSWDj3/?node-id=19561-25592
+ * Read with the Figma MCP `get_variable_defs` tool. See docs/design-tokens.md
+ * for the full Figma variable -> token mapping table.
+ *
+ * Two layers, deliberately:
+ *
+ *   :root   primitives. The raw palette. NOT in `@theme`, so Tailwind does not
+ *           emit `bg-lg-active-red`-style utilities for them — a component
+ *           cannot reach past the semantic layer to grab a raw hue.
+ *   @theme  semantics. Named by role, one per Figma semantic variable, each
+ *           pointing at a primitive. These are what components use.
+ *
+ * Primitive names mirror Figma's own palette names (`active-red`, `light-gray-1`)
+ * rather than being renamed by role: at the primitive layer the hue *is* the
+ * identity, and keeping Figma's name is what makes the mapping auditable.
+ */
+
+:root {
+  /* ---- red ---- */
+  --lg-active-red: #ea1917;
+  --lg-heritage-red: #a50034;
+  --lg-bright-red: #ff3224;
+  --lg-ad-red: #fd312e;
+
+  /* ---- gray: light ---- */
+  --lg-light-gray-0: #f6f6f6;
+  --lg-light-gray-1: #f6f3eb;
+  --lg-light-gray-2: #f0ece4;
+  --lg-light-gray-3: #e6e1d6;
+
+  /* ---- gray: mid ---- */
+  --lg-mid-gray-1: #cbc8c2;
+  --lg-mid-gray-2: #646464;
+  --lg-mid-gray-3: #4a4946;
+
+  /* ---- gray: dark ---- */
+  --lg-dark-gray-1: #333333;
+  --lg-dark-gray-2: #262626;
+  --lg-dark-gray-3: #1a1a1a;
+  --lg-toast-gray: #303030;
+  --lg-near-black: #141414;
+
+  /* ---- neutral extremes ---- */
+  --lg-black: #000000;
+  --lg-white: #ffffff;
+
+  /* ---- logo artwork ----
+     Figma now publishes this as the primitive `logo-gray`, surfaced through the
+     semantic variable `brand/secondary`. It previously existed only as a raw
+     fill baked into the `Logo/LG` artwork (node 1:23, the "LG" wordmark paths),
+     which is why the code-only token `--color-brand-logo-wordmark` used to point
+     here; that token is gone, replaced by `--color-brand-secondary` below. */
+  --lg-logo-gray: #6b6b6b;
+
+  /* ---- accent hues ---- */
+  --lg-green-1: #287d00;
+  --lg-green-2: #316d15;
+  --lg-yellow-1: #f7b500;
+  --lg-yellow-2: #eeb404;
+  --lg-teal-1: #006a63;
+
+  /* ---- gradient ----
+     Figma's `gradient/badge` is a *color style*, not a variable, and its stops
+     cannot be bound to variables — the source file labels it "그라디언트 스톱
+     변수 바인딩 미지원 — raw hex" and warns that changing a primitive will not
+     propagate into the gradient. Here it composes the three red primitives with
+     `var()`, so that warning does not apply to the code side: editing
+     `--lg-active-red` moves the middle stop with it.
+
+     Stops read from the source (node 19561:25710): bright-red → active-red at
+     the midpoint → heritage-red, left to right. Exposed as the `@utility
+     bg-gradient-badge` below, since Tailwind v4 has no `--gradient-*` theme
+     namespace to generate a utility from. */
+  --gradient-badge: linear-gradient(
+    to right,
+    var(--lg-bright-red) 0%,
+    var(--lg-active-red) 50%,
+    var(--lg-heritage-red) 100%
+  );
+}
+
+@theme {
+  /* ---- bg: page-level backgrounds (Figma bg/*) ---- */
+  --color-bg-default: var(--lg-white);
+  --color-bg-warm: var(--lg-light-gray-2);
+  --color-bg-subtle: var(--lg-light-gray-1);
+  --color-bg-elevated: var(--lg-white);
+  --color-bg-light: var(--lg-light-gray-0);
+
+  /* ---- surface: component-level fills (Figma surface/*) ---- */
+  --color-surface-card: var(--lg-white);
+  --color-surface-toast-error: var(--lg-toast-gray);
+  --color-surface-toast-warning: var(--lg-yellow-2);
+  --color-surface-toast-info: var(--lg-teal-1);
+  --color-surface-inverse: var(--lg-dark-gray-1);
+
+  /* ---- text (Figma text/*) ---- */
+  --color-text-primary: var(--lg-black);
+  --color-text-secondary: var(--lg-dark-gray-1);
+  --color-text-tertiary: var(--lg-mid-gray-2);
+  --color-text-disabled: var(--lg-mid-gray-1);
+  --color-text-inverse: var(--lg-white);
+  --color-text-brand: var(--lg-active-red);
+  --color-text-disclaimer: var(--lg-black);
+  --color-text-disclaimer-inverse: var(--lg-white);
+  --color-text-on-toast-error: var(--lg-white);
+  --color-text-on-toast-warning: var(--lg-black);
+  --color-text-on-toast-info: var(--lg-white);
+
+  /* ---- border (Figma border/*) ---- */
+  --color-border-default: var(--lg-light-gray-3);
+  --color-border-strong: var(--lg-mid-gray-1);
+  --color-border-focus: var(--lg-black);
+  --color-border-inverse: var(--lg-white);
+
+  /* ---- brand (Figma brand/*) ---- */
+  --color-brand-primary: var(--lg-active-red);
+  --color-brand-logo: var(--lg-heritage-red);
+  --color-brand-logo-inverse: var(--lg-white);
+  /* Replaces the former code-only `--color-brand-logo-wordmark`: Figma published
+     this value as `brand/secondary`, so the wordmark now points at a real
+     variable instead of a name this repo invented. */
+  --color-brand-secondary: var(--lg-logo-gray);
+
+  /* ---- state (Figma state/*) — *-on-warm variants are the contrast-corrected
+     pair for use on --color-bg-warm ---- */
+  --color-state-success: var(--lg-green-1);
+  --color-state-success-on-warm: var(--lg-green-2);
+  --color-state-warning: var(--lg-yellow-2);
+  --color-state-error: var(--lg-active-red);
+  --color-state-error-on-warm: var(--lg-heritage-red);
+  --color-state-info: var(--lg-teal-1);
+
+  /* ---- review (Figma review/*) ---- */
+  --color-review-star: var(--lg-yellow-1);
+
+  /* ---- icon (Figma icon/*) ---- */
+  --color-icon-default: var(--lg-black);
+  --color-icon-white: var(--lg-white);
+  --color-icon-active: var(--lg-active-red);
+  --color-icon-muted: var(--lg-mid-gray-2);
+
+  /* ---- flag (Figma flag/*) ---- */
+  --color-flag-general: var(--lg-black);
+  --color-flag-promotion: var(--lg-active-red);
+
+  /* ---- action: interactive elements (Figma action/*) ---- */
+  --color-action-primary: var(--lg-active-red);
+  --color-action-promo: var(--lg-ad-red);
+  --color-action-primary-label: var(--lg-white);
+  --color-action-secondary: var(--lg-white);
+  --color-action-secondary-label: var(--lg-black);
+  --color-action-secondary-border: var(--lg-mid-gray-2);
+  --color-action-disabled: var(--lg-mid-gray-1);
+
+  /* ---- shadow colors (Figma shadow/*). Colors only: Figma defines no shadow
+     effect variables in this file, so there is no offset/blur to extract. ---- */
+  --color-shadow-disclaimer: var(--lg-white);
+  --color-shadow-disclaimer-inverse: var(--lg-black);
+}
+
+/* ---- gradient utility ----
+   A gradient is not a color, so it cannot live in the `--color-*` namespace: a
+   `--color-*` key would make Tailwind emit `text-gradient-badge` and
+   `border-gradient-badge`, which are meaningless. Defined as a utility that sets
+   `background-image` instead. See --gradient-badge above for the source. */
+@utility bg-gradient-badge {
+  background-image: var(--gradient-badge);
+}

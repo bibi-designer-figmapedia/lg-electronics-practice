@@ -1,0 +1,17 @@
+/*
+ * Border radius tokens — extracted from Figma (radius/*).
+ *
+ * Source: https://www.figma.com/design/Ma09rS3GL9ahAGRADSWDj3/?node-id=19561-25592
+ *
+ * As with spacing, names keep Figma's numeric step: `radius/8` -> `--radius-8`
+ * -> `rounded-8`. See ./README.md for the naming exception.
+ */
+
+@theme {
+  --radius-4: 0.25rem;
+  --radius-6: 0.375rem;
+  --radius-8: 0.5rem;
+  --radius-12: 0.75rem;
+  --radius-28: 1.75rem;
+  --radius-full: 9999px;
+}

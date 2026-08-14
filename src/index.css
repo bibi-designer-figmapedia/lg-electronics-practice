@@ -1,0 +1,7 @@
+@import 'tailwindcss';
+
+/*
+ * Design token SSOT. Must come after the Tailwind import so its `@theme` keys
+ * are compiled into utility classes. See src/tokens/README.md.
+ */
+@import './tokens/design-tokens.css';

@@ -1,0 +1,49 @@
+/*
+ * Layout tokens — extracted from Figma ("02. Layout", node 19682:12251).
+ *
+ * Source: https://www.figma.com/design/Ma09rS3GL9ahAGRADSWDj3/?node-id=19561-25592
+ *
+ * These describe the page skeleton: how wide the viewport, banner and content
+ * container are, and the insets between them. Figma calls the group `layout/*`.
+ *
+ * Two namespaces, chosen by what each token *is* rather than by its Figma group:
+ *
+ *   --container-*  widths. Tailwind's container namespace, so a width token
+ *                  becomes `max-w-<name>` and cannot be mistaken for a padding.
+ *   --spacing-*    insets and gaps. The spacing namespace, so these become
+ *                  `p-*` / `px-*` / `gap-*` like every other spacing step.
+ *
+ * There is no `--layout-*` theme namespace in Tailwind v4 — keeping the Figma
+ * group name as a prefix would define variables that generate no utility at all,
+ * leaving the tokens unreachable from a `className`. The Figma name is recorded
+ * in the comment on each line instead, so the mapping stays auditable.
+ *
+ * Unlike the numeric `spacing/*` and `radius/*` steps, these names are
+ * role-based, which is the default rule in ./README.md — no exception needed.
+ *
+ * Values are Figma's unitless px, emitted as rem at a 16px root.
+ */
+
+@theme {
+  /* ---- widths (Figma layout/*) ---- */
+  --container-viewport: 120rem; /* layout/viewport  1920 — 전체 뷰포트 너비 */
+  --container-banner: 100rem; /* layout/banner    1600 — 배너 영역 최대 너비 */
+  --container-container: 90rem; /* layout/container 1440 — 콘텐츠 컨테이너 최대 너비 */
+  --container-filter-width: 15rem; /* layout/filter-width 240 — 필터 패널 너비 */
+
+  /* ---- insets and gaps (Figma layout/*) ----
+     `gutter` is the one that duplicates an existing step: Figma defines
+     layout/gutter as 24, the same as spacing/24. It references the step rather
+     than restating the value, so if Figma moves the gutter off 24 only this line
+     changes — and until then the two provably cannot drift apart.
+
+     The two `*-inset` values are derived in Figma itself: viewport-inset is
+     (viewport - container) / 2 and banner-inset is (viewport - banner) / 2. CSS
+     could compute them with calc(), but they are written out because Figma
+     publishes them as their own variables — a calc() here would silently ignore
+     a future value the designers set by hand. */
+  --spacing-gutter: var(--spacing-24); /* layout/gutter 24 — 그리드 컬럼 간격 */
+  --spacing-viewport-inset: 15rem; /* layout/viewport-inset 240 — 뷰포트 좌우 여백 */
+  --spacing-banner-inset: 10rem; /* layout/banner-inset 160 — 배너 좌우 여백 */
+  --spacing-banner-padding: 5rem; /* layout/banner-padding 80 — 배너 내부 패딩 */
+}

@@ -1,0 +1,47 @@
+/*
+ * Spacing tokens — extracted from Figma (spacing/*).
+ *
+ * Source: https://www.figma.com/design/Ma09rS3GL9ahAGRADSWDj3/?node-id=19561-25592
+ *
+ * Names keep Figma's numeric step (`spacing/16` -> `--spacing-16` -> `p-16`) so
+ * a designer saying "spacing 16" and a developer reading `p-16` mean the same
+ * step. This is the documented exception to the role-naming rule in ./README.md.
+ *
+ * Figma stores these as unitless px; they are emitted as rem at a 16px root so
+ * the scale respects the user's browser font size.
+ *
+ * Tailwind v4 keeps its built-in `calc(var(--spacing) * n)` scale alive for
+ * steps NOT named here, so `p-5` still compiles to 1.25rem. Named steps win:
+ * `p-16` resolves to var(--spacing-16) = 1rem, not 16 * 0.25rem.
+ */
+
+@theme {
+  --spacing-4: 0.25rem;
+  --spacing-8: 0.5rem;
+  --spacing-12: 0.75rem;
+  --spacing-16: 1rem;
+  --spacing-20: 1.25rem;
+  --spacing-24: 1.5rem;
+  --spacing-32: 2rem;
+  --spacing-40: 2.5rem;
+  --spacing-48: 3rem;
+  --spacing-64: 4rem;
+
+  /* Not a `spacing/*` variable in Figma: the Input component set
+     (node-id=19563-5289) binds no size variable to its inputbox height —
+     get_variable_defs returns only spacing/8, spacing/12 and radius/12 there —
+     so the md height is a measured frame value. Needed as a named step because
+     Tailwind's built-in scale would resolve `h-44` to 44 * 0.25rem = 11rem.
+     The sibling lg height is the Figma step spacing/48 above. */
+  --spacing-44: 2.75rem;
+
+  /* Not a `spacing/*` variable in Figma: the source file exposes no size
+     variable for it (only icon/default and icon/white). The step comes from the
+     fixed 96-square frame of the Icon/Benefit component set
+     (node-id=19620-23774, used at node-id=19479-8573), which needs `size-96`.
+     Without this named step Tailwind's built-in scale would resolve `size-96`
+     to 96 * 0.25rem = 24rem — four times too large, and silently so: the
+     hardcode hook checks hex, rgb(), raw px and bracket values, not a wrong
+     built-in step. */
+  --spacing-96: 6rem;
+}

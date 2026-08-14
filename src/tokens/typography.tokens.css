@@ -1,0 +1,183 @@
+/*
+ * Typography tokens — extracted from Figma.
+ *
+ * Source: https://www.figma.com/design/Ma09rS3GL9ahAGRADSWDj3/?node-id=19561-25592
+ *
+ * Two parts:
+ *
+ *   @theme     the atoms Figma exposes as variables (font-family/*, font-size/*,
+ *              font-weight/*) plus the line-height steps its text styles use.
+ *   @utility   the composite text styles (title/*, subtitle/*, body/*, cta/*).
+ *
+ * A Figma text style is a *composite* — family + size + weight + line-height at
+ * once. A CSS custom property holds one value, so a text style cannot be a
+ * variable; it is a utility class that sets all four together. Using
+ * `type-title-large` therefore reproduces the Figma style exactly, while picking
+ * `text-60` + `font-semibold` by hand can drift from it.
+ *
+ * Font sizes and line heights are stored unitless (px) in Figma and emitted as
+ * rem at a 16px root so type scales with the user's browser font size.
+ */
+
+@theme {
+  /* Figma font-family/sans is "Noto Sans KR". The fallback chain is NOT from
+     Figma — it is added so text still renders if the webfont is unavailable.
+     Note: this project does not yet load the Noto Sans KR webfont. */
+  --font-sans: 'Noto Sans KR', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* ---- font-size (Figma font-size/*) — all 10 steps are Figma variables ----
+     `font-size/14` used to be code-only; Figma has since published it, along with
+     the new 12 · 20 · 80 steps. Note that having a variable is not the same as a
+     text style *using* it: title/xlarge and body/small still hardcode their size
+     in Figma (80 and 14) rather than binding to these. */
+  --text-12: 0.75rem;
+  --text-14: 0.875rem;
+  --text-16: 1rem;
+  --text-20: 1.25rem;
+  --text-24: 1.5rem;
+  --text-32: 2rem;
+  --text-36: 2.25rem;
+  --text-56: 3.5rem;
+  --text-60: 3.75rem;
+  --text-80: 5rem;
+
+  /* ---- font-weight (Figma font-weight/*) ---- */
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+
+  /* ---- line-height. Figma's text styles use absolute px line heights but
+     expose no variables for them, so the steps are named after those px. ---- */
+  --leading-14: 0.875rem;
+  --leading-16: 1rem;
+  --leading-20: 1.25rem;
+  --leading-24: 1.5rem;
+  --leading-28: 1.75rem;
+  --leading-36: 2.25rem;
+  --leading-42: 2.625rem;
+  --leading-60: 3.75rem;
+  --leading-80: 5rem;
+}
+
+/* ---- text styles: one @utility per Figma text style ---- */
+
+/* Figma title/xlarge — 대형 헤드라인 (원본 Web/EI Headline/80-semibold). Like
+   body/small, this style hardcodes its size in Figma (80) instead of binding to
+   the font-size/80 variable, so the two must be kept in step by hand. */
+@utility type-title-xlarge {
+  font-family: var(--font-sans);
+  font-size: var(--text-80);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-80);
+  letter-spacing: 0;
+}
+
+/* Figma title/large */
+@utility type-title-large {
+  font-family: var(--font-sans);
+  font-size: var(--text-60);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-60);
+  letter-spacing: 0;
+}
+
+/* Figma title/medium */
+@utility type-title-medium {
+  font-family: var(--font-sans);
+  font-size: var(--text-56);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-60);
+  letter-spacing: 0;
+}
+
+/* Figma title/small */
+@utility type-title-small {
+  font-family: var(--font-sans);
+  font-size: var(--text-32);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-36);
+  letter-spacing: 0;
+}
+
+/* Figma subtitle/large */
+@utility type-subtitle-large {
+  font-family: var(--font-sans);
+  font-size: var(--text-36);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--leading-42);
+  letter-spacing: 0;
+}
+
+/* Figma subtitle/medium */
+@utility type-subtitle-medium {
+  font-family: var(--font-sans);
+  font-size: var(--text-24);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--leading-28);
+  letter-spacing: 0;
+}
+
+/* Figma subtitle/medium-strong */
+@utility type-subtitle-medium-strong {
+  font-family: var(--font-sans);
+  font-size: var(--text-24);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-28);
+  letter-spacing: 0;
+}
+
+/* Figma body/default */
+@utility type-body-default {
+  font-family: var(--font-sans);
+  font-size: var(--text-16);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--leading-20);
+  letter-spacing: 0;
+}
+
+/* Figma body/default-strong */
+@utility type-body-default-strong {
+  font-family: var(--font-sans);
+  font-size: var(--text-16);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-20);
+  letter-spacing: 0;
+}
+
+/* Figma body/small. The only style whose values are hardcoded in Figma rather
+   than bound to font-size/* and font-weight/* variables. */
+@utility type-body-small {
+  font-family: var(--font-sans);
+  font-size: var(--text-14);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--leading-16);
+  letter-spacing: 0;
+}
+
+/* Figma cta/medium — same size as body/default but line-height 16, tightened
+   for a single-line button label. */
+@utility type-cta-medium {
+  font-family: var(--font-sans);
+  font-size: var(--text-16);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-16);
+  letter-spacing: 0;
+}
+
+/* Figma nav/menu — 네비게이션 메뉴 (원본 Web/EI Text/20-regular). */
+@utility type-nav-menu {
+  font-family: var(--font-sans);
+  font-size: var(--text-20);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--leading-24);
+  letter-spacing: 0;
+}
+
+/* Figma badge/small — 뱃지·라벨 (원본 Web/EI Text/12-regular). The smallest step
+   in the scale; pairs with bg-gradient-badge and flag/* colors. */
+@utility type-badge-small {
+  font-family: var(--font-sans);
+  font-size: var(--text-12);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--leading-14);
+  letter-spacing: 0;
+}

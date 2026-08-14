@@ -1,0 +1,37 @@
+/*
+ * Design token entry point.
+ *
+ * `src/index.css` imports this file and nothing else from src/tokens/, so this
+ * stays the single door into the token layer — see ./README.md. Each axis lives
+ * in its own `*.tokens.css`; all of them are exempt from the hardcode hook
+ * because token definitions are the one place raw values belong.
+ *
+ * The color, spacing, radius, typography, and layout axes are extracted from
+ * Figma: https://www.figma.com/design/Ma09rS3GL9ahAGRADSWDj3/?node-id=19561-25592
+ * The mapping table is in docs/design-tokens.md.
+ */
+
+@import './colors.tokens.css';
+@import './spacing.tokens.css';
+@import './radius.tokens.css';
+@import './typography.tokens.css';
+/* After spacing: layout's --spacing-gutter references a step defined there. */
+@import './layout.tokens.css';
+
+@theme {
+  /* ---- shadow ----
+     NOT from Figma: the source file defines no shadow effect variables, only the
+     two shadow *colors* now in colors.tokens.css. These three steps predate the
+     Figma extraction and are kept so existing `shadow-*` utilities keep working.
+     Replace them once Figma publishes real elevation variables. */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+
+  /* ---- breakpoint ----
+     NOT from Figma: no breakpoint variables exist in the source file. */
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+}
