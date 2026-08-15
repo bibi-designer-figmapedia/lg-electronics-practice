@@ -60,6 +60,7 @@ pass 조건:
 
 - 4개 중 하나라도 없으면 그 컴포넌트는 **미완료**로 계산한다. 3/4는 완료가 아니다.
 - **검증**: `npm run verify:process` → 컴포넌트별 4단계 체크 표를 출력, 미충족이 하나라도 있으면 exit code 1
+- **이 검증이 판정하지 못하는 것**: 산출물 1·2는 링크와 대응표가 **기록됐는지**만 본다. 기록된 매핑이 실제 Figma와 맞는지는 판정 대상이 아니다 — 그것은 `design-reviewer`의 몫이다. 즉 `verify:process` 통과는 "4단계를 거쳤다"는 증거이지 "구현이 정확하다"는 증거가 아니다.
 
 > 4단계 각각의 *내용*(4원칙)은 아래 `## 카파시 4원칙`과 `## 표준 워크플로` 절에서 정의된다. 이 절은 "4단계를 통과해야 완료"라는 **판정 규칙**만 고정한다.
 
@@ -181,7 +182,7 @@ pass 조건:
 | 명령어 | 무엇을 판정하는가 | 상태 |
 | --- | --- | --- |
 | `npm run verify:tokens` | 목적 1 · 2 | 사용 가능 — hook 스크립트의 `--scan` 모드 |
-| `npm run verify:process` | 목적 3 | **미구현** — 뒤 청크 |
+| `npm run verify:process` | 목적 3 | 사용 가능 — `.claude/scripts/verify-process.mjs` |
 | `npm run typecheck` | 타입 안전성 | 사용 가능 |
 | `npm run build-storybook` | 목적 3 보조 (story/autodocs 빌드 확인) | 사용 가능 |
 
@@ -191,7 +192,6 @@ pass 조건:
 
 ## 아직 없는 것 (뒤 청크에서 채움)
 
-- **`npm run verify:process`** — 목적 3의 4개 산출물을 컴포넌트별로 체크하는 스크립트. 이것이 없는 동안 목적 3은 `design-reviewer`의 수동 판정에만 의존한다.
 - **`src/components/Button.tsx`의 토큰 마이그레이션** — Tailwind 기본 팔레트(`bg-neutral-900`, `h-8`, `px-3`)를 쓰고 있다. hook은 이를 차단하지 않지만(검사 대상은 hex·rgb·raw px·대괄호 임의값) **토큰이 아니므로** `design-reviewer` 2번 항목에서는 FAIL이다.
 - **Figma 연결 실증** — 아직 실제 Figma 파일로 `/figma-to-code`를 통과시킨 컴포넌트가 없다. MCP 4개 도구 호출 경로는 문서로만 정의된 상태다.
 

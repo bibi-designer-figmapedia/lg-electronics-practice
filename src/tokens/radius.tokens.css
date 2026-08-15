@@ -12,6 +12,36 @@
   --radius-6: 0.375rem;
   --radius-8: 0.5rem;
   --radius-12: 0.75rem;
+
+  /* Not a `radius/*` variable in Figma: the Button/Promotion component set
+     (node-id=1-15) binds no radius variable — get_variable_defs returns colours
+     only — and its corner radius falls between the Figma steps 12 and 28.
+     Measured off the frame, named numerically like the steps around it so the
+     designer's "radius 16" and the developer's `rounded-16` stay the same
+     thing. Unlike the spacing scale there is no built-in numeric fallback for
+     `rounded-*`, so before this token `rounded-16` generated no CSS at all. */
+  --radius-16: 1rem;
+
   --radius-28: 1.75rem;
+
+  /* A `radius/*` variable in Figma, but a role name rather than a numeric step:
+     `radius/banner-l`. Its value is 28 — the same as the step above — so it
+     references that step instead of restating the number, exactly as
+     `--spacing-gutter` references `--spacing-24` in ./layout.tokens.css. If
+     Figma ever moves the banner corner off 28, only this line changes; until
+     then the two provably cannot drift apart.
+     Source: the `ST0001.Hero Banner` frame of the HeroBanner component set
+     (layout=left node-id=19661-17274, layout=center node-id=19661-17328).
+     get_variable_defs on their parents (19661:17370 · 19661:17369) returns
+     `radius/banner-l` and it is the only radius in that subtree that is not
+     `radius/8` (the nested Button/Web corners).
+     Kept as its own name rather than consuming `rounded-28` directly because
+     Figma publishes it as its own variable — the same argument
+     ./layout.tokens.css makes for writing the two `*-inset` values out instead
+     of computing them, and the opposite of the PDPItemImage case, where
+     get_variable_defs returned nothing and 28 was a measured value with no
+     name of its own to honour. */
+  --radius-banner-l: var(--radius-28);
+
   --radius-full: 9999px;
 }

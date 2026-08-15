@@ -40,12 +40,55 @@
   --lg-dark-gray-1: #333333;
   --lg-dark-gray-2: #262626;
   --lg-dark-gray-3: #1a1a1a;
+  /* Read from Figma, but as a *resolved* value, not a published primitive: the
+     semantic variable `banner/label` (surfaced as --color-banner-label below)
+     carries this value on the MainContentTitle component set
+     (node-id=19613-13769), and the colour documentation frame
+     (node-id=19561-25592) publishes 24 primitives of which none holds it — nor
+     does that frame list `banner/label` at all. So there is no Figma primitive
+     name to mirror here, unlike every other entry in this block.
+     Named as the next step of the numbered dark-gray family because it is
+     darker than dark-gray-3, which is the only relation the value has to the
+     scale. Note it is darker than near-black too — this block is grouped by
+     family, not sorted by lightness. Neither of those two can stand in for it:
+     near-black and text/primary's --lg-black are both different values, and
+     collapsing them would silently redraw the label. If Figma publishes a
+     primitive for it, rename to match and drop this note. */
+  --lg-dark-gray-4: #111111;
   --lg-toast-gray: #303030;
   --lg-near-black: #141414;
 
   /* ---- neutral extremes ---- */
   --lg-black: #000000;
   --lg-white: #ffffff;
+  /* The palette's only translucent primitive, and Figma's own name for it —
+     `white-60` is published in the colour documentation frame
+     (node-id=19561-25592) right beside the opaque `white`. Written as the
+     8-digit hex get_variable_defs reports so the mapping table stays a
+     character-for-character comparison; `99` is 153/255, the 60% the name
+     says, and Figma's own export writes the same colour as
+     rgba(255, 255, 255, 0.6).
+     NOT a substitute for --lg-white at 60% opacity applied to an element:
+     opacity fades everything inside a box, this fades only the fill. The one
+     thing it fills is the Pmax banner's blur plate — see
+     --color-surface-blur-blind. */
+  --lg-white-60: #ffffff99;
+  /* The palette's second translucent primitive, and unlike `white-60` above
+     this name is NOT Figma's — the colour documentation frame
+     (node-id=19561-25592) publishes no translucent black, and the modal sheet
+     that needs it (node-id=158-8745 in the MBR_020301 file) draws no dim layer
+     at all. The screen definition only writes the requirement in prose: "뒤
+     화면은 어둡게 가린다". So the value is authored here, at the 50% the
+     requester approved, and named in the shape `white-60` already established:
+     the hue plus its alpha percentage. Written as the 8-digit hex that primitive
+     uses so the two read the same; `80` is 128/255, the 50% the name says.
+     NOT a substitute for --lg-black at 50% opacity applied to an element:
+     opacity fades everything inside a box — the modal card and its contents
+     included — while this fades only the fill of the plate behind them. The one
+     thing it fills is that plate; see --color-surface-dim.
+     If Figma ever publishes a translucent black, rename to match and drop this
+     note. */
+  --lg-black-50: #00000080;
 
   /* ---- logo artwork ----
      Figma now publishes this as the primitive `logo-gray`, surfaced through the
@@ -61,6 +104,16 @@
   --lg-yellow-1: #f7b500;
   --lg-yellow-2: #eeb404;
   --lg-teal-1: #006a63;
+
+  /* Campaign 배경 그라데이션의 아래쪽 스톱. Figma 변수가 아니라 시안 이미지에서
+     실측한 값이다 — 이 화면(Sign in Campaign)은 Figma 노드가 없이 시안 1장으로만
+     들어왔고, 캠페인 팔레트가 문서화돼 있지 않다. 이미지 하단 여러 지점에서 같은
+     값이 나왔고 가로 방향으로는 변하지 않는다.
+     기존 red 계열(active-red 등)과 별개 이름으로 둔 이유: 저 넷은 브랜드 팔레트의
+     채도 높은 빨강이고 이것은 흰색에 가까운 배경 틴트다. 역할이 달라 한쪽 값이
+     움직일 때 다른 쪽이 따라가면 안 된다.
+     Figma 가 캠페인 팔레트를 발행하면 그 이름으로 바꾸고 이 주석을 지울 것. */
+  --lg-campaign-pink: #fff2f2;
 
   /* ---- gradient ----
      Figma's `gradient/badge` is a *color style*, not a variable, and its stops
@@ -80,6 +133,19 @@
     var(--lg-active-red) 50%,
     var(--lg-heritage-red) 100%
   );
+
+  /* Campaign Sign in 화면의 페이지 배경. gradient/badge 와 달리 Figma 색 스타일이
+     아니라 시안 이미지에서 읽은 것이다.
+     세로 방향으로 스캔한 결과: 위에서 약 30% 지점까지 순백이 유지되다가 거기서부터
+     아래 끝까지 선형으로 campaign-pink 에 도달한다. 가로 방향으로는 변하지 않는다.
+     30% 스톱을 생략하고 0%→100% 로 두면 화면 위쪽 절반이 전부 분홍기를 띠어 시안과
+     달라진다 — 흰 구간이 이 배경의 특징이라 스톱을 유지한다. */
+  --gradient-campaign: linear-gradient(
+    to bottom,
+    var(--lg-white) 0%,
+    var(--lg-white) 30%,
+    var(--lg-campaign-pink) 100%
+  );
 }
 
 @theme {
@@ -90,12 +156,64 @@
   --color-bg-elevated: var(--lg-white);
   --color-bg-light: var(--lg-light-gray-0);
 
+  /* ---- background (Figma background/*) ----
+     A SECOND background group, and the prefix difference is not a typo.
+     `background/LV1` is not a member of the `bg/*` block above: the colour
+     documentation frame (node-id=19561-25592) publishes those five and no
+     `bg/lv1`, while `background/LV1` surfaces on the Pmax banner canvas
+     (get_variable_defs on node-id=19661-21073) and appears in no other group.
+     Two Figma group names therefore stay two prefixes — the same 1:1 rule that
+     keeps `banner/label` out of the text block. Naming it `--color-bg-lv1`
+     would assert a `bg/lv1` variable that does not exist, and would take that
+     name away from the real one the day Figma publishes it. Lower-cased like
+     every other token here; Figma writes the level as `LV1`.
+
+     Points at the primitive already in the palette as `light-gray-3` (Figma
+     publishes the same value a second time as `Warm Gray 05`, which is what
+     `background/LV1` resolves through). NOT merged with
+     --color-border-default, the only other semantic pointing there: that one
+     is a stroke colour, so borrowing it would let a repaint of the border
+     colour silently repaint a 1200x1200 canvas.
+     Consumed as `bg-background-lv1`. */
+  --color-background-lv1: var(--lg-light-gray-3);
+
   /* ---- surface: component-level fills (Figma surface/*) ---- */
   --color-surface-card: var(--lg-white);
   --color-surface-toast-error: var(--lg-toast-gray);
   --color-surface-toast-warning: var(--lg-yellow-2);
   --color-surface-toast-info: var(--lg-teal-1);
   --color-surface-inverse: var(--lg-dark-gray-1);
+  /* The translucent plate that the Pmax banner lays over its backdrop photo so
+     the copy stays readable (node 19661:17030, named "Blur blind"). Paired with
+     --blur-blind in design-tokens.css: this is the fill, that is the
+     backdrop-filter radius; the plate needs both and neither draws the effect
+     alone.
+
+     The name is Figma's, not one invented here. The plate's fill on that node
+     is bound to the *primitive* `white-60`, but the colour documentation frame
+     publishes a semantic at the same value named `surface/blur-blind` — after
+     this very layer — so the semantic layer has a published role name and code
+     points at it. (A code-side name like `overlay-blind` would have invented a
+     group this palette does not have; there is no `overlay/*` or `scrim/*` in
+     the source file.) The 1:1 rule then puts it in the surface block rather
+     than in a group of its own.
+     Consumed as `bg-surface-blur-blind`. */
+  --color-surface-blur-blind: var(--lg-white-60);
+
+  /* The plate a modal lays over the screen behind it so the page reads as
+     covered (Modal.tsx). Fills with --lg-black-50; the argument for the
+     translucent primitive rather than an `opacity` utility is on that token.
+
+     Code-only, and named on the same rule --color-surface-blur-blind argues
+     above: there is no `overlay/*` or `scrim/*` group in the source file, so a
+     name like `--color-overlay-dim` would invent a Figma group instead of
+     reporting one. What differs from blur-blind is that Figma publishes no
+     semantic for this either — the modal sheet (node-id=158-8745) has no dim
+     layer to bind, only the prose requirement quoted on --lg-black-50 — so this
+     is placed in the surface block as the closest published role: a
+     component-level fill. If Figma publishes a name for it, rename to match.
+     Consumed as `bg-surface-dim`. */
+  --color-surface-dim: var(--lg-black-50);
 
   /* ---- text (Figma text/*) ---- */
   --color-text-primary: var(--lg-black);
@@ -110,11 +228,49 @@
   --color-text-on-toast-warning: var(--lg-black);
   --color-text-on-toast-info: var(--lg-white);
 
+  /* ---- banner (Figma banner/*) ----
+     Figma scopes this to its own `banner/*` group rather than to `text/*`, and
+     the group name is kept so the variable and the token stay 1:1 — hence
+     `text-banner-label`, not `text-text-banner-label`. Listed next to the text
+     block because it is a label colour and that is where someone will look for
+     it. Source: the eyebrow label of the MainContentTitle component set
+     (node-id=19613-13769); both of its variants report the variable, so it does
+     not vary by Size or Align. See --lg-dark-gray-4 for why the primitive it
+     points at is the one code-side name in this file with no Figma counterpart. */
+  --color-banner-label: var(--lg-dark-gray-4);
+
   /* ---- border (Figma border/*) ---- */
   --color-border-default: var(--lg-light-gray-3);
   --color-border-strong: var(--lg-mid-gray-1);
   --color-border-focus: var(--lg-black);
   --color-border-inverse: var(--lg-white);
+  /* NOT from Figma: `border/focus` is published, but it has no inverse sibling —
+     get_variable_defs on Header/Notification (node-id=19661-4208) returns seven
+     variables (surface/inverse, text/inverse, icon/white, spacing/20, spacing/24
+     and two type atoms) and no focus variable at all; the source file has no
+     focus variant on any component. So the value is decided here, and the reason
+     is a measurable failure rather than a preference.
+
+     `border/focus` is #000000 and the only surface it has to sit on in
+     Header/Notification is `surface/inverse` (#333333). That pair is 1.66:1,
+     under the 3:1 that WCAG 2.1 SC 1.4.11 requires of a focus indicator. White
+     on the same surface is 12.64:1.
+
+     Points at --lg-white, which is also what --color-border-inverse above points
+     at. The two are NOT merged, for the same reason `action/primary-label` and
+     `action/secondary` stay split at equal values: the roles differ and each can
+     move alone. This one tracks `border/focus` — if the design ever moves the
+     focus colour off black, this line moves with it and --color-border-inverse
+     does not. Borrowing --color-border-inverse would instead tie the keyboard
+     focus indicator of the inverse bar to a decorative border colour, and a
+     later change there (say, to a translucent grey divider) would silently take
+     the indicator back under 3:1 with nothing to catch it.
+
+     Named `-inverse` after the existing suffix: `border/inverse`,
+     `text/disclaimer-inverse`, `shadow/disclaimer-inverse`, `brand/logo-inverse`
+     — the variant that is used on the inverted surface. If Figma publishes
+     `border/focus-inverse`, this keeps its name and this note goes away. */
+  --color-border-focus-inverse: var(--lg-white);
 
   /* ---- brand (Figma brand/*) ---- */
   --color-brand-primary: var(--lg-active-red);
@@ -124,6 +280,43 @@
      this value as `brand/secondary`, so the wordmark now points at a real
      variable instead of a name this repo invented. */
   --color-brand-secondary: var(--lg-logo-gray);
+
+  /* ---- third-party brand marks ----
+     NOT from Figma, and NOT part of the LG palette. These are the fills of the
+     Google "G" and Facebook "f" logos on the social sign-in buttons.
+     get_variable_defs on the sign-in section (node-id=19661-16991) returns 34
+     variables and not one of these five: the marks are pasted vendor artwork
+     whose fills are raw hex in the source file, exactly as they are in the
+     vendors' own brand kits. They are registered here only because a `.tsx`
+     may not hold a raw hex — not because they joined the palette.
+
+     Defined directly rather than pointing at a `:root` primitive, unlike every
+     other token in this block. The two-layer split exists so a role can be
+     repointed at a different hue without touching call sites; these have no
+     role to repoint. The hue IS the contract — Google's red is fixed by Google,
+     not by this design system — so a primitive underneath would be a 1:1
+     indirection with nothing on either end that can move. Hue names for the
+     four Google segments are the names in Google's own asset spec, which is
+     the same argument the README's primitive-palette exception makes, applied
+     to a palette that is not ours. They sit in `@theme` rather than `:root`
+     because a component has to reach them to draw the icon path.
+
+     Do NOT reuse these outside the vendor mark they belong to. Recolouring a
+     vendor asset breaks that vendor's usage terms, and borrowing e.g. the
+     Facebook blue as a UI accent would tie an LG surface to a colour LG cannot
+     change. LG's own brand colours are the four `--color-brand-primary` /
+     `-logo` / `-logo-inverse` / `-secondary` lines above.
+
+     Values are copied from the Figma artwork as-is and deliberately not
+     "corrected" against the vendors' published specs — the Facebook blue here
+     is one step off Meta's documented #1877f2 in each channel. If that gap is
+     to be closed it is a design decision made in Figma, not a silent edit
+     here. */
+  --color-brand-google-red: #f44336;
+  --color-brand-google-yellow: #ffc107;
+  --color-brand-google-green: #43a047;
+  --color-brand-google-blue: #448aff;
+  --color-brand-facebook: #1977f3;
 
   /* ---- state (Figma state/*) — *-on-warm variants are the contrast-corrected
      pair for use on --color-bg-warm ---- */
@@ -169,4 +362,10 @@
    `background-image` instead. See --gradient-badge above for the source. */
 @utility bg-gradient-badge {
   background-image: var(--gradient-badge);
+}
+
+/* Campaign Sign in 의 페이지 배경. 같은 이유로 --color-* 가 아니라 유틸리티다.
+   출처와 스톱 근거는 --gradient-campaign 위 주석 참고. */
+@utility bg-gradient-campaign {
+  background-image: var(--gradient-campaign);
 }

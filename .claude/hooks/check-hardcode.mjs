@@ -210,6 +210,144 @@ function extractPayloads(toolInput) {
   return payloads
 }
 
+/* -------------------------------------------------------------- bash mode */
+
+/*
+ * A shell command carries no file content — only the command string. There is
+ * nothing to scan, so a write that lands in src/ through the shell reaches disk
+ * completely unchecked. That is exactly how two 90KB+ data modules were placed
+ * during the icon work: generated in a scratch dir, then `cp`-ed into src/.
+ *
+ * Since the content cannot be inspected, the only honest enforcement is to
+ * refuse the write and send it back through Edit/Write, which ARE scanned.
+ */
+
+const SHELL_WRITE_VERBS = new Set(['cp', 'mv', 'rsync', 'install', 'ln', 'tee', 'dd'])
+const IN_PLACE_EDITORS = new Set(['sed', 'perl', 'awk'])
+
+/* `git checkout -- <path>` and `git apply` drop arbitrary content into a path. */
+const GIT_WRITE_SUBCOMMANDS = new Set([
+  'checkout', 'restore', 'apply', 'am', 'stash', 'clean', 'reset', 'revert', 'merge', 'cherry-pick',
+])
+
+function unquote(token) {
+  return token.replace(/^["']/, '').replace(/["']$/, '')
+}
+
+/** Split a command line into segments that each run on their own. */
+function splitSegments(command) {
+  return command.split(/\s*(?:&&|\|\||[;|\n])\s*/).filter(Boolean)
+}
+
+/** Every path this segment would write to. Read-only segments yield nothing. */
+function writeTargets(segment) {
+  const targets = []
+
+  // `> file`, `>> file`, `2> file` — the destination follows the operator.
+  const redirect = /(?:^|\s)\d?>>?\s*("[^"]*"|'[^']*'|[^\s;|&]+)/g
+  let match
+  while ((match = redirect.exec(segment)) !== null) targets.push(unquote(match[1]))
+
+  const tokens = (segment.match(/"[^"]*"|'[^']*'|[^\s]+/g) ?? []).map(unquote)
+  if (tokens.length === 0) return targets
+
+  const verb = basename(tokens[0])
+  const args = tokens.slice(1).filter((t) => !t.startsWith('-'))
+
+  if (SHELL_WRITE_VERBS.has(verb)) {
+    const ofArg = tokens.find((t) => t.startsWith('of='))
+    if (ofArg) targets.push(ofArg.slice(3))
+    else if (verb === 'tee') targets.push(...args)
+    else if (args.length > 0) targets.push(args[args.length - 1])
+  }
+
+  if (verb === 'git' && GIT_WRITE_SUBCOMMANDS.has(args[0])) {
+    const sub = args[0]
+    const paths = args.slice(1)
+
+    // A patch carries its paths inside the file, not on the command line —
+    // nothing here can be inspected, so treat it as touching all of src/.
+    if (sub === 'apply' || sub === 'am') targets.push(SCAN_ROOT)
+    else if (sub === 'checkout' || sub === 'restore') {
+      // `git checkout .` rewrites the whole tree; a bare branch name does not.
+      if (paths.includes('.')) targets.push(SCAN_ROOT)
+      targets.push(...paths)
+    }
+  }
+
+  // `sed -i`, `perl -i` rewrite their input files in place.
+  if (IN_PLACE_EDITORS.has(verb) && tokens.some((t) => /^-.*i/.test(t))) {
+    targets.push(...args.filter((a) => TARGET_EXTENSIONS.has(extname(a))))
+  }
+
+  return targets
+}
+
+/** Would this destination land a scannable source file inside src/? */
+function isGuardedDestination(target) {
+  const normalized = target.replace(/^\.\//, '')
+  const underSrc = normalized === SCAN_ROOT
+    || normalized.startsWith(`${SCAN_ROOT}/`)
+    || normalized.includes(`/${SCAN_ROOT}/`)
+  if (!underSrc) return false
+  if (isExemptFile(normalized)) return false
+
+  const ext = extname(normalized)
+  // No extension = a directory destination (`cp a.ts src/components/`).
+  return ext === '' || TARGET_EXTENSIONS.has(ext)
+}
+
+function runBashHook(toolInput) {
+  const command = typeof toolInput?.command === 'string' ? toolInput.command : ''
+  if (!command.trim()) process.exit(0)
+
+  /*
+   * `cd src/components && cp /tmp/a.ts ./a.ts` writes into src/ without the
+   * word "src" appearing anywhere near the write. Track cd across segments so
+   * relative destinations resolve against the directory actually in effect.
+   */
+  const blocked = []
+  let cwd = ''
+
+  for (const segment of splitSegments(command)) {
+    const cdMatch = /^cd\s+("[^"]*"|'[^']*'|[^\s]+)\s*$/.exec(segment.trim())
+    if (cdMatch) {
+      const dir = unquote(cdMatch[1])
+      cwd = dir.startsWith('/') || dir === '-' ? dir : join(cwd, dir)
+      continue
+    }
+    if (/^cd\s*$/.test(segment.trim())) {
+      cwd = ''
+      continue
+    }
+
+    for (const target of writeTargets(segment)) {
+      const resolved = target.startsWith('/') ? target : join(cwd, target)
+      if (isGuardedDestination(resolved) && !blocked.includes(resolved)) blocked.push(resolved)
+    }
+  }
+
+  if (blocked.length === 0) process.exit(0)
+
+  process.stderr.write(
+    [
+      '',
+      '⛔ 셸을 통한 src/ 쓰기가 차단되었습니다 (CLAUDE.md 레이어 3 / 목적 2)',
+      `   대상: ${blocked.join(', ')}`,
+      '',
+      '   셸 명령에는 파일 내용이 실려 있지 않아 토큰 검사를 할 수 없습니다.',
+      '   검사되지 않은 쓰기를 통과시키면 레이어 3이 최종 방어선이 아니게 되므로,',
+      '   내용을 볼 수 없는 경로 자체를 막습니다.',
+      '',
+      '   해결 경로: Edit / Write / MultiEdit 도구로 쓰세요 — 이 경로는 내용이',
+      '   검사되고, 위반 값과 대체 토큰 이름이 함께 보고됩니다.',
+      '   파일이 Write 한도를 넘길 만큼 크면 여러 모듈로 나눠서 쓰세요.',
+      '',
+    ].join('\n'),
+  )
+  process.exit(2)
+}
+
 function runHook() {
   const raw = readStdin()
   if (!raw.trim()) process.exit(0)
@@ -221,6 +359,8 @@ function runHook() {
     // Never block on a parse failure — a broken hook must not halt all editing.
     process.exit(0)
   }
+
+  if (payload.tool_name === 'Bash') runBashHook(payload.tool_input ?? {})
 
   const toolInput = payload.tool_input ?? {}
   const filePath = toolInput.file_path ?? ''

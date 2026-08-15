@@ -26,3 +26,7 @@ storybook-static
 *.njsproj
 *.sln
 *.sw?
+
+# LG EI 폰트 — LG 전용 라이선스 폰트. 저장소가 공개이므로 파일을 추적하지 않는다.
+# 받는 방법과 정확한 파일명은 README.md 참고.
+public/fonts/*.otf

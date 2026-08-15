@@ -19,6 +19,23 @@
 @import './layout.tokens.css';
 
 @theme {
+  /* ---- border-width ----
+     NOT from Figma: the source file publishes border *colours* (`border/*`, now
+     `--color-border-*` in colors.tokens.css) but no stroke-weight variable, so
+     the weight is a measured value. One step, because one is all the design
+     uses: the Button/Web outline variants (node-id=19649-31393) stroke at 1.
+     Kept here rather than in its own `*.tokens.css` for the same reason as the
+     two axes below — a single non-Figma token does not need its own file.
+
+     The value is not restated. It references the hairline spacing step so the
+     two provably cannot drift: `border-hairline` on an element with a real CSS
+     border and `h-hairline` on a filled indicator bar are the same rule, drawn
+     two different ways, and Tailwind needs a variable in each namespace to
+     expose both. spacing.tokens.css is imported above, so the reference
+     resolves. If the design ever thickens one without the other, this line —
+     not the call sites — is what changes. */
+  --border-width-hairline: var(--spacing-hairline);
+
   /* ---- shadow ----
      NOT from Figma: the source file defines no shadow effect variables, only the
      two shadow *colors* now in colors.tokens.css. These three steps predate the
@@ -27,6 +44,80 @@
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+
+  /* ---- text-shadow ----
+     NOT a Figma effect variable: the source file publishes no effect variables
+     at all — the same gap the three box-shadow steps above sit in. What Figma
+     does publish here is the *colour*: get_variable_defs(19649:32052) returns
+     shadow/disclaimer, and get_design_context on the disclaimer text
+     (node-id=19649-32055) writes the effect as two layers with no offset and
+     no spread, blur 30 then blur 10. So the geometry is measured and the
+     colour is published — which is why this is one token and not a new file.
+
+     Both layers reference --color-shadow-disclaimer, although Figma binds the
+     variable to only the second one and leaves the first a literal white. They
+     are the same colour drawing the same glow; keeping one literal would let a
+     repaint of shadow/disclaimer move half the effect and not the other half.
+
+     The blurs are rem, not px like the three --shadow-* steps above: this is a
+     glow around text, so it should grow with the text it sits behind.
+
+     30 and 10 are deliberately NOT written as var(--spacing-30) and a spacing
+     step for 10. The first coincides exactly with the Disclaimer frame's
+     horizontal padding registered in spacing.tokens.css, and that is a
+     coincidence — a padding and a blur radius are moved by different
+     decisions. Tying them is the semantic coupling --spacing-92 and
+     --spacing-82 were registered to break.
+
+     Named `disclaimer-glow`, not `disclaimer`, and the difference is load
+     bearing. Tailwind resolves `text-<name>` against BOTH the --text-shadow-*
+     and the --color-* namespaces, so a token named --text-shadow-disclaimer
+     also matches the existing --color-shadow-disclaimer and makes the class
+     emit `color: var(--color-shadow-disclaimer)` — white — beside the shadow.
+     Compiling both names confirmed it: under `disclaimer` the generated rule
+     carries that colour declaration, under `disclaimer-glow` it carries only
+     the text-shadow. Today the stray declaration happens to lose to
+     `.text-text-disclaimer`, which Tailwind emits after it, but that is an
+     ordering accident, and any element using the glow without an explicit text
+     colour would render white on white. `disclaimer-glow` is safe
+     structurally rather than by accident: the colour it would have to collide
+     with is --color-disclaimer-glow, and every semantic colour name in this
+     repo starts with a Figma group (action, bg, border, brand, flag, icon,
+     review, shadow, state, surface, text) — `disclaimer` is not one of them.
+     Consumed as `text-shadow-disclaimer-glow`. */
+  --text-shadow-disclaimer-glow:
+    0 0 1.875rem var(--color-shadow-disclaimer),
+    0 0 0.625rem var(--color-shadow-disclaimer);
+
+  /* ---- blur ----
+     The one effect variable Figma *does* publish, unlike the shadow and
+     text-shadow blocks above: `Blur/Background 150`, reported by
+     get_variable_defs(19661:17030) as Effect(type: BACKGROUND_BLUR,
+     radius: 150).
+
+     The CSS value is 75, half that radius, and that halving is NOT a
+     conversion invented here — get_design_context on the same node writes the
+     plate as `backdrop-blur-[75px]`, so 75 is the number Figma itself emits
+     for CSS. Kept as the single token rather than restating 150 anywhere: the
+     Figma radius has no meaning on this side.
+
+     Named for the role — the "Blur blind" plate at node 19661:17030, whose
+     fill is --color-surface-blur-blind — and deliberately not
+     `--blur-background-150`. The numeric-name exception in ./README.md covers
+     scale steps whose Figma number *is* the value (`spacing/16`, `radius/8`);
+     here the Figma number is not the value, so a numeric name would state a
+     number this token does not carry, which is the exact failure that
+     exception exists to avoid.
+
+     px, not rem: this is a filter radius over a photograph. Growing it with
+     the root font size would change how much of the picture dissolves.
+
+     Tailwind reads `backdrop-blur-*` from this namespace, which is why the
+     token lives here and not in `--backdrop-blur-*` (no such namespace). The
+     plain `blur-blind` utility is emitted from the same variable as a direct
+     filter; nothing uses it, and it is the same radius if anything ever does.
+     Consumed as `backdrop-blur-blind`. */
+  --blur-blind: 75px;
 
   /* ---- breakpoint ----
      NOT from Figma: no breakpoint variables exist in the source file. */

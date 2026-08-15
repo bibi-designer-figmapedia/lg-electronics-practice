@@ -102,7 +102,7 @@ export function Input({
         aria-invalid={state === 'error' ? true : undefined}
         aria-describedby={messageId}
         disabled={disabled || state === 'disabled'}
-        className={`type-body-default w-full rounded-12 border px-12 ${sizeClasses[size]} ${stateClasses[state]} ${className}`}
+        className={`type-body-default w-full rounded-12 border-hairline px-12 ${sizeClasses[size]} ${stateClasses[state]} ${className}`}
         {...props}
       />
       {hasMessage ? (

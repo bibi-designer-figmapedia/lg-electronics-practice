@@ -20,21 +20,62 @@
  */
 
 @theme {
-  /* Figma font-family/sans is "Noto Sans KR". The fallback chain is NOT from
-     Figma — it is added so text still renders if the webfont is unavailable.
-     Note: this project does not yet load the Noto Sans KR webfont. */
-  --font-sans: 'Noto Sans KR', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* ---- font-family (Figma font-family/*) ----
+     TWO families, not one. The source file used to publish a single
+     `font-family/sans` ("Noto Sans KR"); it now publishes `font-family/headline`
+     and `font-family/text`, and the old variable is gone from the collection —
+     so `--font-sans` is gone from here too rather than lingering as a name Figma
+     no longer knows.
+
+     Which family a text style uses is not a judgement call: every style names
+     one. The split lands exactly on the title/* group — the four title styles
+     bind font-family/headline, the other nine bind font-family/text — and each
+     utility below restates its own so the binding is checkable one style at a
+     time rather than inferred from the group name.
+
+     The fallback chains are NOT from Figma; they are added so text still renders
+     if the webfont is unavailable. That case is live right now: the faces are
+     licensed LG .otf files kept out of this public repo, so until they are
+     placed in public/fonts/ (see ../../README.md) both names fall through to the
+     system font and rendered metrics are not the Figma ones. src/index.css holds
+     the @font-face rules that make these names resolve — naming a family here
+     does not load it. */
+  --font-headline: 'LG EI Headline', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-text: 'LG EI Text', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
   /* ---- font-size (Figma font-size/*) — all 10 steps are Figma variables ----
      `font-size/14` used to be code-only; Figma has since published it, along with
-     the new 12 · 20 · 80 steps. Note that having a variable is not the same as a
-     text style *using* it: title/xlarge and body/small still hardcode their size
-     in Figma (80 and 14) rather than binding to these. */
+     the 12 · 20 · 80 steps. Every text style now binds these rather than
+     restating a number: title/xlarge and body/small used to hardcode their size
+     (80 and 14), and the font change re-authored them onto font-size/80 and
+     font-size/14. Nothing on this scale moved — the values below are unchanged;
+     only who points at them did. */
   --text-12: 0.75rem;
   --text-14: 0.875rem;
   --text-16: 1rem;
+
+  /* NOT a Figma `font-size/*` variable, same case as the 30 step below. The
+     tone=black BenefitRow label (node-id=1-496 and its two siblings, inside
+     node-id=1-385) sets its size as a raw 19: get_variable_defs on that variant
+     returns icon/default, icon/white and text/primary and nothing else — no
+     font-size, no font-family, no font-weight, no style entry — while the same
+     call on the tone=white variant's item (node-id=1-52) does return
+     font-size/20, font-family/text, font-weight/regular and the nav/menu style.
+     Both calls were re-run after the font change and both still say the same
+     thing, so this label is style-less by authoring and not by a stale read.
+     Named after the px like the rest of this scale so the value stays traceable
+     to the frame it was measured on. Material for type-benefit-label. */
+  --text-19: 1.1875rem;
+
   --text-20: 1.25rem;
   --text-24: 1.5rem;
+  /* NOT a Figma `font-size/*` variable. The Button/Promotion label
+     (node-id=1-17) sets its size as a raw 30 — get_variable_defs on the
+     component set returns colours only, and get_design_context reports no named
+     text style for it. Named after the px like the rest of this scale so the
+     value stays traceable to the frame it was measured on. */
+  --text-30: 1.875rem;
+
   --text-32: 2rem;
   --text-36: 2.25rem;
   --text-56: 3.5rem;
@@ -52,19 +93,49 @@
   --leading-20: 1.25rem;
   --leading-24: 1.5rem;
   --leading-28: 1.75rem;
+  --leading-30: 1.875rem;
   --leading-36: 2.25rem;
   --leading-42: 2.625rem;
   --leading-60: 3.75rem;
   --leading-80: 5rem;
+
+  /* The one line-height here that is a RATIO, not an absolute length, and the
+     one that is role-named rather than numbered. Both follow from the source.
+     Every step above is absolute because Figma's text styles author absolute px
+     line heights; the tone=black BenefitRow label (node-id=1-496, inside
+     node-id=1-385) is not a text style and authors a PERCENTAGE instead. The
+     evidence is in the shape of the export, not just its number:
+     get_design_context(1:386) emits this label's size and letter-spacing as
+     `19px` and `0.38px` but its line-height as a unitless `1.14`. Figma writes
+     absolute line heights as px the same way it writes those, so a unitless
+     ratio coming back means there is no px to read.
+     Named for its role because a numeric name in this namespace would be read
+     as px — every one of the ten steps above means px — and this is 114%, not
+     114 anything. The README's numeric-name exception covers values on a scale;
+     a ratio is not on the px scale at all. Same argument as --spacing-hairline
+     and --spacing-underline in ./spacing.tokens.css.
+     Deliberately NOT registered as an absolute 22. That number is reachable —
+     the label frame measures 44 tall and holds two lines — but it is a
+     consequence, not a cause, and it does not even reconcile: 19 * 1.14 = 21.66,
+     so two line boxes come to 43.32 and the frame's 44 is its own height with
+     the text centred in it (the export wraps the two lines in a
+     `flex flex-col justify-center` box). Deriving 22 from 44 would encode a
+     container metric as a line height and drift the day the frame's height
+     changes, which is the test the 19 and 5 slack values in ./spacing.tokens.css
+     failed. Holding the ratio also keeps the label at Figma's 114% if the size
+     ever moves, whereas a frozen 22 would silently become a different
+     percentage. */
+  --leading-benefit-label: 1.14;
 }
 
 /* ---- text styles: one @utility per Figma text style ---- */
 
-/* Figma title/xlarge — 대형 헤드라인 (원본 Web/EI Headline/80-semibold). Like
-   body/small, this style hardcodes its size in Figma (80) instead of binding to
-   the font-size/80 variable, so the two must be kept in step by hand. */
+/* Figma title/xlarge — 대형 헤드라인. font-family/headline + font-size/80 +
+   font-weight/semibold, line-height 80. It used to hardcode its size in Figma;
+   it now binds font-size/80, so the two no longer have to be kept in step by
+   hand. */
 @utility type-title-xlarge {
-  font-family: var(--font-sans);
+  font-family: var(--font-headline);
   font-size: var(--text-80);
   font-weight: var(--font-weight-semibold);
   line-height: var(--leading-80);
@@ -73,7 +144,7 @@
 
 /* Figma title/large */
 @utility type-title-large {
-  font-family: var(--font-sans);
+  font-family: var(--font-headline);
   font-size: var(--text-60);
   font-weight: var(--font-weight-semibold);
   line-height: var(--leading-60);
@@ -82,7 +153,7 @@
 
 /* Figma title/medium */
 @utility type-title-medium {
-  font-family: var(--font-sans);
+  font-family: var(--font-headline);
   font-size: var(--text-56);
   font-weight: var(--font-weight-semibold);
   line-height: var(--leading-60);
@@ -91,7 +162,7 @@
 
 /* Figma title/small */
 @utility type-title-small {
-  font-family: var(--font-sans);
+  font-family: var(--font-headline);
   font-size: var(--text-32);
   font-weight: var(--font-weight-semibold);
   line-height: var(--leading-36);
@@ -100,7 +171,7 @@
 
 /* Figma subtitle/large */
 @utility type-subtitle-large {
-  font-family: var(--font-sans);
+  font-family: var(--font-text);
   font-size: var(--text-36);
   font-weight: var(--font-weight-regular);
   line-height: var(--leading-42);
@@ -109,7 +180,7 @@
 
 /* Figma subtitle/medium */
 @utility type-subtitle-medium {
-  font-family: var(--font-sans);
+  font-family: var(--font-text);
   font-size: var(--text-24);
   font-weight: var(--font-weight-regular);
   line-height: var(--leading-28);
@@ -118,7 +189,7 @@
 
 /* Figma subtitle/medium-strong */
 @utility type-subtitle-medium-strong {
-  font-family: var(--font-sans);
+  font-family: var(--font-text);
   font-size: var(--text-24);
   font-weight: var(--font-weight-semibold);
   line-height: var(--leading-28);
@@ -127,7 +198,7 @@
 
 /* Figma body/default */
 @utility type-body-default {
-  font-family: var(--font-sans);
+  font-family: var(--font-text);
   font-size: var(--text-16);
   font-weight: var(--font-weight-regular);
   line-height: var(--leading-20);
@@ -136,17 +207,18 @@
 
 /* Figma body/default-strong */
 @utility type-body-default-strong {
-  font-family: var(--font-sans);
+  font-family: var(--font-text);
   font-size: var(--text-16);
   font-weight: var(--font-weight-semibold);
   line-height: var(--leading-20);
   letter-spacing: 0;
 }
 
-/* Figma body/small. The only style whose values are hardcoded in Figma rather
-   than bound to font-size/* and font-weight/* variables. */
+/* Figma body/small. Used to be the only style whose values were hardcoded in
+   Figma; it now binds font-family/text, font-size/14 and font-weight/regular
+   like every other style. */
 @utility type-body-small {
-  font-family: var(--font-sans);
+  font-family: var(--font-text);
   font-size: var(--text-14);
   font-weight: var(--font-weight-regular);
   line-height: var(--leading-16);
@@ -156,16 +228,45 @@
 /* Figma cta/medium — same size as body/default but line-height 16, tightened
    for a single-line button label. */
 @utility type-cta-medium {
-  font-family: var(--font-sans);
+  font-family: var(--font-text);
   font-size: var(--text-16);
   font-weight: var(--font-weight-semibold);
   line-height: var(--leading-16);
   letter-spacing: 0;
 }
 
+/* 프로모션 버튼 라벨 — 큰 CTA. **No Figma text style corresponds to this.** The
+   other twelve utilities here are named after a published style; this one is
+   named for its role because the Button/Promotion label (node-id=1-17) carries
+   no style at all. Evidence, so nobody re-derives it: get_variable_defs on the
+   component set (node-id=1-15) returns only action/promo, action/primary-label,
+   action/secondary-label, text/inverse and border/focus — no style entry —
+   whereas the same call on Button/Text does return `subtitle/medium-strong`.
+   That call was re-run after the font change and still returns those five
+   colours and nothing else.
+
+   Its family is therefore a code decision, not a Figma reading: `--font-text`,
+   because this is a button label and every published style in that role
+   (cta/medium, body/*, nav/menu) binds font-family/text — only the four title/*
+   styles bind font-family/headline. Recorded as a decision because Figma states
+   nothing here. If design publishes a style for this label, take the family from
+   it rather than from this note.
+
+   `cta-large` places it next to type-cta-medium (Figma cta/medium), the standard
+   button label: same role, one size up. It is not a near-miss of an existing
+   style — type-title-small differs in all three of size, weight and line-height.
+   If Figma ever publishes a style for it, rename to match and drop this note. */
+@utility type-cta-large {
+  font-family: var(--font-text);
+  font-size: var(--text-30);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--leading-30);
+  letter-spacing: 0;
+}
+
 /* Figma nav/menu — 네비게이션 메뉴 (원본 Web/EI Text/20-regular). */
 @utility type-nav-menu {
-  font-family: var(--font-sans);
+  font-family: var(--font-text);
   font-size: var(--text-20);
   font-weight: var(--font-weight-regular);
   line-height: var(--leading-24);
@@ -175,9 +276,45 @@
 /* Figma badge/small — 뱃지·라벨 (원본 Web/EI Text/12-regular). The smallest step
    in the scale; pairs with bg-gradient-badge and flag/* colors. */
 @utility type-badge-small {
-  font-family: var(--font-sans);
+  font-family: var(--font-text);
   font-size: var(--text-12);
   font-weight: var(--font-weight-regular);
   line-height: var(--leading-14);
   letter-spacing: 0;
+}
+
+/* BenefitRow 라벨(tone=black) — 혜택 아이콘 옆 2줄 라벨. **No Figma text style
+   corresponds to this**, so it is role-named for the same reason
+   type-cta-large above is, and the evidence has the same shape:
+   get_variable_defs on the tone=black variant (node-id=1-385) returns
+   icon/default, icon/white and text/primary and no style entry, whereas the
+   same call on the tone=white variant's item (node-id=1-52) returns the
+   nav/menu style plus font-size/20, font-family/text and font-weight/regular.
+   The tool can return named styles; this variant has none. Both calls were
+   re-run after the font change and neither answer moved.
+
+   Its family is a code decision for the same reason type-cta-large's is, and
+   the same one: `--font-text`. This is a body-weight label, and font-family/
+   headline is bound by exactly the four title/* styles and nothing else. If
+   design ever publishes a style for the tone=black label, take the family from
+   it rather than from this note.
+   Not a near-miss of an existing utility. type-nav-menu — which the sibling
+   tone=white label really does bind — is 20/regular/24 against this one's
+   19/semibold/114%, so all three differ, and nothing else in this file uses
+   size 19. The two tone variants genuinely disagree in Figma; that disagreement
+   is reported to design rather than resolved here (see BenefitRow.tsx).
+   letter-spacing stays inline rather than becoming a token, matching all
+   thirteen utilities above, which write their 0 the same way. It is expressed
+   as `em` rather than the `0.38px` get_design_context(1:386) emits: 0.38 is
+   exactly 2% of 19, and the em form holds that 2% instead of freezing a length.
+   The two are identical at this size, and the em keeps the utility internally
+   consistent — the size is rem and the line-height a ratio, so both already
+   scale with the user's font size while a px tracking would not. If Figma is
+   ever read as authoring an absolute 0.38, change this one line. */
+@utility type-benefit-label {
+  font-family: var(--font-text);
+  font-size: var(--text-19);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-benefit-label);
+  letter-spacing: 0.02em;
 }

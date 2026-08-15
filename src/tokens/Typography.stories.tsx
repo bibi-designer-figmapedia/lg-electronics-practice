@@ -60,7 +60,8 @@ const ATOM_NAMES = [
   ...SIZE_STEPS.map(([variable]) => variable),
   '--font-weight-regular',
   '--font-weight-semibold',
-  '--font-sans',
+  '--font-headline',
+  '--font-text',
 ]
 
 /** What the browser ended up applying to one sample line. */
@@ -109,8 +110,19 @@ function TypographyGallery() {
         조합하면 어긋날 수 있다.
       </p>
       <p className="type-body-small mt-8 text-text-tertiary">
-        주의: --font-sans 는 {atoms['--font-sans'] || '—'} 이지만 이 프로젝트는 아직
-        Noto Sans KR 웹폰트를 로드하지 않는다. 아래 샘플은 폴백 체인으로 렌더된다.
+        패밀리는 2개다. --font-headline 은 {atoms['--font-headline'] || '—'} 이고
+        --font-text 는 {atoms['--font-text'] || '—'} 다. Figma 가 font-family/sans
+        하나를 이 둘로 쪼갰고, 갈라지는 자리는 정확히 title/* 4개(headline) 대
+        나머지 9개(text)다. 이름 뒤의 폴백 체인은 Figma 것이 아니라 웹폰트를 못
+        받았을 때를 위해 코드에서 붙인 것이다.
+      </p>
+      <p className="type-body-small mt-8 text-text-tertiary">
+        LG EI 는 npm 에 없는 LG 전용 폰트라 public/fonts/ 에서 self-host 한다(6개
+        페이스 = 2 패밀리 × Regular·SemiBold·Bold). 저장소가 공개라 .otf 파일은
+        커밋되지 않으므로, 파일을 넣지 않은 환경에서는 아래 샘플이 폴백 폰트로
+        렌더된다 — 크기·굵기·행간은 맞지만 글자 모양과 지표는 Figma 원본이 아니다.
+        받는 방법은 루트 README.md 에 있다. 지금 보고 있는 것이 실제 LG EI 인지는
+        브라우저 개발자도구의 Computed → Rendered Fonts 로 확인할 수 있다.
       </p>
 
       <section className="mt-32">

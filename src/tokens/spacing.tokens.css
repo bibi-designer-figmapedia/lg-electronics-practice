@@ -44,4 +44,478 @@
      hardcode hook checks hex, rgb(), raw px and bracket values, not a wrong
      built-in step. */
   --spacing-96: 6rem;
+
+  /* Not a `spacing/*` variable in Figma: the Icon/UI instance inside the
+     Button/Text component set (node-id=19661-3700) is a 24-square master
+     resized to 18 on the frame. get_variable_defs on that node returns
+     text/primary, the font-family, font-size and font-weight atoms,
+     icon/default, border/focus and spacing/8 — no size variable — so 18 is a
+     measured value. Same silent-failure mode as the 96 step above: without this
+     name `size-18` resolves to 18 * 0.25rem = 4.5rem, four times too large, and
+     nothing flags it. */
+  --spacing-18: 1.125rem;
+
+  /* Not a `spacing/*` variable in Figma: the Button/Promotion component set
+     (node-id=1-15) binds no spacing variable at all — get_variable_defs returns
+     only action/promo, action/primary-label, action/secondary-label,
+     text/inverse and border/focus. Its horizontal padding sits between the
+     Figma steps 32 and 40, so it is a measured frame value. Needed as a named
+     step because `px-36` would otherwise resolve to 36 * 0.25rem = 9rem. The
+     vertical padding of the same frame is the Figma step spacing/20 above. */
+  --spacing-36: 2.25rem;
+
+  /* Not a `spacing/*` variable in Figma: same node as the 36 step. The
+     Button/Promotion frame height sits between the Figma steps 64 and 96 with
+     nothing in between, so it is a measured value. Without this name `h-78`
+     would resolve to 78 * 0.25rem = 19.5rem. */
+  --spacing-78: 4.875rem;
+
+  /* Not a `spacing/*` variable in Figma: every one of the 18 variant frames of
+     the Button/Web component set (node-id=19649-31393) carries a raw
+     `min-width: 80` constraint with no variable bound to it. The Figma scale
+     jumps 64 -> 96, so the step has to be named here or the constraint gets
+     dropped: `min-w-80` would otherwise resolve to 80 * 0.25rem = 20rem.
+     The constraint only shows on short labels ("OK"); longer ones exceed 80 on
+     their own. The sibling `min-height: 36` on the same frames is deliberately
+     NOT tokenised — those frames fix their height at 44/48/64, so it can never
+     apply, and a token nothing can use is a token that will be misused.
+     Coincides with layout/banner-padding (also 80) but is a separate decision:
+     that one is a banner inset published by Figma as its own variable. */
+  --spacing-80: 5rem;
+
+  /* Not a `spacing/*` variable in Figma: the LeftMenu variant of the
+     CategoryMenu component set (node-id=19655-33598) fixes its root frame
+     height at 38 and centres a 28-tall Tab in it. get_variable_defs on that
+     node returns text/primary, nav/menu and its font atoms, brand/primary and
+     spacing/40 — no size variable — so 38 is a measured frame value. Sits
+     between the Figma steps 36 and 40, which is why neither can stand in.
+     Same silent-failure mode as the 78 and 96 steps: without this name `h-38`
+     resolves to 38 * 0.25rem = 9.5rem, four times too large, and the hardcode
+     hook does not check for a wrong built-in step.
+     The height is tokenised rather than the 5 of slack above and below the tab,
+     for two reasons. (a) 38 is what Figma authors; the 5 is the leftover of
+     centring 28 in 38, so naming it would encode a consequence as a cause and
+     let the root drift off 38 the day the tab's height changes. (b) A numeric
+     `--spacing-5` would shadow Tailwind's built-in `p-5`/`h-5`/`gap-5`
+     (1.25rem) — the same collision `--spacing-hairline` and
+     `--spacing-underline` below are role-named to avoid — and no role name
+     honestly describes a value Figma never drew. 38 has no such problem: it
+     lies in the sparse upper range where the built-in `n * 0.25rem` result is
+     nonsense nothing uses on purpose, so the numeric name is free to take it.
+     The sibling FillWidth variant (node-id=19661-3411) needs no token here: its
+     52 is derived from a real bound spacing/12 padding plus the same 28 tab. */
+  --spacing-38: 2.375rem;
+
+  /* Not a `spacing/*` variable in Figma: the "Link" frame of the secondary
+     variant of Header/GNB (node-id=19655-33547, inside node-id=19661-3965)
+     fixes its height at 76 and centres the 38-tall logo in it.
+     get_variable_defs on that node returns text/disclaimer, brand/secondary,
+     brand/logo, text/primary and spacing/24 — the only size variable there is
+     the 24 horizontal padding, already consumed as `px-24` — so 76 is a
+     measured frame value. Same silent-failure mode as the 38, 78 and 96 steps:
+     without this name `h-76` resolves to 76 * 0.25rem = 19rem, four times too
+     large, and the hardcode hook does not check for a wrong built-in step.
+     The height is tokenised rather than the 19 of slack above and below the
+     logo, for the same two reasons the 38 step above gives. (a) 76 is what
+     Figma authors; the 19 is the leftover of centring 38 in 76, so naming it
+     would encode a consequence as a cause and let the frame drift off 76 the
+     day the logo's height changes. (b) Nothing but that centring produces a 19,
+     so no role name honestly describes it. 76 itself is free to take a numeric
+     name: it lies in the same sparse upper range as 38, where the built-in
+     `n * 0.25rem` result is nonsense nothing uses on purpose, and the repo has
+     no `*-76` utility at all.
+     Sits next to the 78 step above, which is a coincidence, not a duplicate:
+     that one is the Button/Promotion frame height and this one a header bar
+     height, and Figma moves them independently. Merging them would freeze an
+     accident. If a third neighbour turns up in this range, that is a signal
+     Figma needs a real scale up here rather than more measured steps.
+     That condition has since fired: the 82 and 92 steps below fill this range
+     out to 76 78 80 82 92 96. They were still registered — see the 82 step for
+     why — and the signal is recorded as a follow-up in docs/design-tokens.md. */
+  --spacing-76: 4.75rem;
+
+  /* Not a `spacing/*` variable in Figma: the Default variant of Header/GNB
+     (node-id=19643-30719) places its Logo/LG at an absolute x of 92 inside the
+     1920-wide root. get_variable_defs on that node returns text/primary,
+     nav/menu and its font atoms, brand/primary, brand/logo,
+     brand/logo-inverse, brand/secondary, icon/default, bg/warm, border/strong
+     and two size variables — spacing/40 and spacing/8 — neither of which is
+     this position (40 is the tab gap inside CategoryMenu, 8 the icon padding
+     inside RightMenu). So 92 is a measured frame value.
+     It is a cause, not a consequence: Figma authors the logo's x directly
+     rather than deriving it from a centring or a padding, so naming it does
+     not freeze a leftover the way naming the 19 of slack in the 76 step above
+     would. That is the test the 5 and 19 slack values failed.
+     Registered to break a semantic coupling, not just to shorten a class list.
+     The position used to be written as `left-80` + `ml-12`, which sums to
+     exactly 92 with no rounding error — but --spacing-80 is registered as the
+     `min-width: 80` constraint of the Button/Web set and --spacing-12 is a
+     Figma step, so the header's logo position was riding on a button
+     constraint. Each of those two tokens can move for its own documented
+     reason, and the day either does the header shifts silently: the sum stays
+     valid CSS, so neither the hardcode hook nor `verify:tokens` can see it.
+     Same silent-failure mode as the 38, 76, 78 and 96 steps on the built-in
+     scale too: without this name `left-92` resolves to 92 * 0.25rem = 23rem.
+     The numeric name is free — 92 sits in the same sparse upper range as 38
+     and 76, and a repo-wide grep found no `*-92` utility at all (the only
+     match was this hazard described in a HeaderGNB comment). */
+  --spacing-92: 5.75rem;
+
+  /* Not a `spacing/*` variable in Figma: the left/right inset of the "Link"
+     frame of the secondary Header/GNB variant (node-id=19655-33547, inside
+     node-id=19661-3965). get_variable_defs on both the variant and the Link
+     frame returns text/disclaimer, brand/secondary, brand/logo, text/primary
+     and spacing/24 (plus bg/warm on the variant root) — the only size variable
+     is the 24 horizontal padding, already consumed as `px-24` — so 82 is a
+     measured value.
+     Registered for the same reason as the 92 step above: it used to be written
+     as `px-64` + `mx-18`, an exact sum, but --spacing-18 is registered as the
+     resized Icon/UI inside Button/Text, so the header's horizontal inset was
+     riding on a button icon size. Nothing in either token's documented purpose
+     keeps them summing to 82.
+     Dependency direction, stated plainly because it differs from Figma's.
+     Figma draws the Link at a fixed width of 1756 centred in the 1920 root, so
+     over there 82 is the leftover of (1920 - 1756) / 2 — a consequence. The
+     implementation deliberately inverts this: it holds the inset and lets the
+     frame fill the remainder, so the bar still reads correctly when the root is
+     narrower than 1920, which a fixed 1756 would not. Under that model the
+     inset is the authored parameter and the width is what follows, which is why
+     the inset is what gets a name. This is not the 19/5 slack case: those were
+     leftovers in the code's own model too, so naming them would have inverted
+     nothing and merely frozen a result. If Figma ever publishes the Link width
+     as a variable, revisit this token rather than adding one beside it.
+     Built-in scale would resolve `px-82` to 82 * 0.25rem = 20.5rem. A repo-wide
+     grep found no `*-82` utility, so the numeric name is free.
+     With 82 in place this upper range now holds 76 78 80 82 92 96. The 76 step
+     above says a third neighbour here is a signal that Figma needs a real scale
+     up here rather than more measured steps; that threshold is now crossed and
+     is recorded as a follow-up in docs/design-tokens.md. It is a signal to take
+     to the designer, not a reason to leave the coupling above in place — the
+     alternative to naming these two was not fewer tokens, it was two header
+     metrics silently depending on two button tokens. */
+  --spacing-82: 5.125rem;
+
+  /* Not a `spacing/*` variable in Figma: the `txt` frame of FuntionalTabItem
+     (node-id=19661-19907) and the `title` text inside it are both fixed at a
+     width of 180. get_variable_defs on that node returns Primary Color/Black,
+     icon/active, icon/default, text/primary, state/error, the font-size,
+     font-family and font-weight atoms and the cta/medium and badge/small text
+     styles — no size variable at all — so 180 is a measured frame value.
+     Same silent-failure mode as the 38, 76, 78, 92 and 96 steps: without this
+     name `w-180` resolves to 180 * 0.25rem = 45rem, four times too large, and
+     the hardcode hook does not check for a wrong built-in step.
+     Registered in the spacing namespace rather than as a `--container-*` width,
+     even though it is a width, because the `--container-*` names in
+     layout.tokens.css are the page skeleton Figma publishes as `layout/*`
+     variables; this is a measured step inside one component, like the 96 square
+     of Icon/Benefit and the 80 min-width of Button/Web above.
+     Well clear of the crowded 76-96 band, so it does not add to the follow-up
+     the 76 and 82 steps record in docs/design-tokens.md. A repo-wide grep found
+     no `*-180` utility, so the numeric name is free. */
+  --spacing-180: 11.25rem;
+
+  /* Not a `spacing/*` variable in Figma: the social sign-in buttons of the
+     sign-in section (node-id=19661-16991) are 56-squares. get_variable_defs on
+     that node returns 34 variables whose only size steps are spacing/4, 8, 12,
+     16, 20, 24, 32 and 40 — none of them 56 — so it is a measured frame value.
+     It sits between the Figma steps 48 and 64 above with nothing in between,
+     so neither can stand in without resizing the button.
+     Same silent-failure mode as the 38, 76, 78, 92 and 96 steps: without this
+     name `size-56` resolves to 56 * 0.25rem = 14rem, four times too large, and
+     the hardcode hook does not check for a wrong built-in step.
+     Well clear of the crowded 76-96 band, so it does not add to the follow-up
+     the 76 and 82 steps record in docs/design-tokens.md. The numeric name is
+     free: a repo-wide grep found no `*-56` utility, and the only other 56 in
+     the token layer is --text-56, a font size in a different namespace.
+     One step covers both axes — the button is square, so `size-56` is a single
+     decision, not a width and a height that could drift. */
+  --spacing-56: 3.5rem;
+
+  /* Not a `spacing/*` variable in Figma: the two Button/Web instances inside the
+     Case=Button variant of ComponentTitle (node-id=19661-15712 — the instances
+     are 19676:25030 "Sign in" and 19676:25057 "Join US") are both resized to a
+     fixed width of 140. get_variable_defs on that node returns 20 variables
+     whose only size steps are spacing/4, 8, 12, 16, 20 and radius/8 — none of
+     them 140 — and get_design_context on the same node writes every other
+     metric of those two frames as a `var(--spacing/...)` reference while the
+     width comes out as a bare literal. So 140 is a measured frame value.
+     It is a FIXED `width`, not a `min-width`. Both frames carry both
+     constraints: the `min-width: 80` they inherit from the Button/Web set (the
+     --spacing-80 step above) and this authored 140 on the instance. With 140
+     applied the 80 is inert, so the two are not interchangeable and this step
+     must not be folded into --spacing-80 — that one is the set's floor for short
+     labels, this one is one composition's override of it. Consumed as `w-140`.
+     It is a cause, not a consequence: the labels are far narrower than 140
+     ("Join US" at body/default-strong plus the spacing/16 side padding comes to
+     roughly two thirds of it), so the width is deliberately larger than its
+     content rather than being the hug result of anything. That is the test the
+     19 and 5 slack values in the 76 and 38 steps above failed.
+     Registered in the spacing namespace rather than as a `--container-*` width,
+     on the same argument the 180 step above gives: the `--container-*` names in
+     layout.tokens.css are the page skeleton Figma publishes as `layout/*`
+     variables, while this is a measured step inside one component.
+     Same silent-failure mode as the 38, 76, 78, 92, 96 and 180 steps: without
+     this name `w-140` resolves to 140 * 0.25rem = 35rem, four times too large,
+     and the hardcode hook does not check for a wrong built-in step. A
+     repo-wide grep found no `*-140` utility, so the numeric name is free — the
+     only other 140 in the repo is inside SVG path data and in a HeaderGNB-family
+     comment described next.
+     Distinct from the 140 that Navigation.tsx (node-id=19661-3947) deliberately
+     did NOT tokenise, despite the identical number. That one is the sum of its
+     two children's heights (60 + 80) — a consequence, and a height. This one is
+     an authored width on a resized instance. Nothing keeps the two in step, so
+     Navigation must not start consuming this token; its comment saying the scale
+     has no 140 step is now stale on the fact while still correct on the
+     decision. Well clear of the crowded 76-96 band, so it does not add to the
+     follow-up the 76 and 82 steps record in docs/design-tokens.md. */
+  --spacing-140: 8.75rem;
+
+  /* Not a `spacing/*` variable in Figma: the MainContentTitle instance inside
+     the HeroBanner component set (layout=left 19661:17311, layout=center
+     19661:17329) is fixed at a width of 860 in both variants.
+     get_variable_defs on the two variant roots (19661:17370 · 19661:17369)
+     returns 26 variables whose only size steps are spacing/4, 8, 12, 16, 24,
+     80 and 160 plus radius/8 and radius/banner-l — none of them 860 — and
+     get_design_context writes every other metric of that frame as a
+     `var(--spacing/...)` reference while this width comes out as a bare
+     literal. So 860 is a measured frame value.
+     It is a cause, not a consequence, which is the test the 19 and 5 slack
+     values in the 76 and 38 steps above failed. The frame it sits in is 1600
+     wide with a spacing/80 padding on each side, so a hug or fill result would
+     be 1440; 860 is authored well inside that and the leftover splits
+     differently per variant (all of it on the right when layout=left, halved
+     either side when layout=center). Figma derives the *position* from the
+     width, not the other way round.
+     It is load-bearing, not decoration: the layout=center variant's title wraps
+     onto a second line at this width (its instance measures 296 tall against
+     the left variant's 216), so letting the block fill 1440 instead would
+     silently reflow the design.
+     Same silent-failure mode as the 38, 76, 78, 92, 96, 140 and 180 steps:
+     without this name `w-860` resolves to 860 * 0.25rem = 215rem, four times
+     too large, and the hardcode hook does not check for a wrong built-in step.
+     Registered in the spacing namespace rather than as a `--container-*` width,
+     on the argument the 140 and 180 steps above give: the `--container-*` names
+     in ./layout.tokens.css are the page skeleton Figma publishes as `layout/*`
+     variables, while this is a measured step inside one component. Well clear
+     of the crowded 76-96 band, so it does not add to the follow-up the 76 and
+     82 steps record in docs/design-tokens.md. A repo-wide grep found no `*-860`
+     utility, so the numeric name is free. */
+  --spacing-860: 53.75rem;
+
+  /* Not a `spacing/*` variable in Figma: the Form/SignIn card is authored at a
+     fixed width of 450 — on the library component set (node-id=19661-15302) and
+     again on the page/SignIn sheet that consumes it
+     (https://www.figma.com/design/GskFyUHuqkVOzqgytOAenb/?node-id=118-7103).
+     get_design_context on that sheet writes every other metric of the card as a
+     `var(--spacing/...)` reference (padding 32/40, gap 20, radius 12) while the
+     width comes out as a bare literal, so 450 is a measured frame value.
+     It is a cause, not a consequence, which is the test the 19 and 5 slack
+     values in the 76 and 38 steps above failed. Figma centres the card in an
+     883-tall container and derives the leftover margins from this width, not the
+     other way round; the card's own content (a 348-wide disclaimer paragraph
+     plus the spacing/32 side padding = 412) is narrower, so hug would not
+     produce 450 either.
+     It is load-bearing: FormSignIn.tsx deliberately does not carry a width of
+     its own ("폭은 호출부가 정한다"), so without a named step the only callers
+     left are a bare literal or a Tailwind built-in — `max-w-md` is 448, two off,
+     and is exactly the kind of built-in step CLAUDE.md marks as a
+     design-reviewer FAIL. Same silent-failure mode as the 38, 76, 78, 92, 96,
+     140, 180 and 860 steps: without this name `w-450` resolves to
+     450 * 0.25rem = 112.5rem, four times too large.
+     Registered in the spacing namespace rather than as a `--container-*` width,
+     on the argument the 140, 180 and 860 steps above give: the `--container-*`
+     names in ./layout.tokens.css are the page skeleton Figma publishes as
+     `layout/*` variables, while this is a measured step inside one component.
+     Well clear of the crowded 76-96 band, so it does not add to the follow-up
+     the 76 and 82 steps record in docs/design-tokens.md. A repo-wide grep found
+     no `*-450` utility, so the numeric name is free. */
+  --spacing-450: 28.125rem;
+
+  /* Not a `spacing/*` variable in Figma: the coupon-registration modal card is
+     authored at a fixed width of 660 on the MBR_020301 sheet
+     (https://www.figma.com/design/GskFyUHuqkVOzqgytOAenb/?node-id=158-8745).
+     get_variable_defs on that node returns spacing/8, spacing/12, spacing/20
+     and spacing/40 as its only size steps — none of them 660 — and
+     get_design_context writes the card's padding, gap and radius as
+     `var(--spacing/...)` / `var(--radius/...)` references while the width comes
+     out as a bare literal. Same signature as the 140, 450 and 860 steps above.
+     It is a cause, not a consequence, which is the test the 19 and 5 slack
+     values in the 76 and 38 steps above failed. Figma centres the card in the
+     1920-wide container and derives the 630 side margins from this width; the
+     card's own content is narrower (the widest child is the consent row, well
+     under 500, plus the spacing/40 side padding), so hug would not produce 660.
+     Load-bearing for the same reason 450 is: Modal.tsx does not carry a width of
+     its own — the caller sets it — so without a named step the only callers left
+     are a bare literal or a Tailwind built-in. Same silent-failure mode as the
+     38, 76, 78, 92, 96, 140, 180, 450 and 860 steps: without this name `w-660`
+     resolves to 660 * 0.25rem = 165rem, four times too large.
+     Registered in the spacing namespace rather than as a `--container-*` width,
+     on the argument the 140, 180, 450 and 860 steps give: the `--container-*`
+     names in ./layout.tokens.css are the page skeleton Figma publishes as
+     `layout/*` variables, while this is a measured step inside one component.
+     Well clear of the crowded 76-96 band, so it does not add to the follow-up
+     the 76 and 82 steps record in docs/design-tokens.md. A repo-wide grep found
+     no `*-660` utility, so the numeric name is free. */
+  --spacing-660: 41.25rem;
+
+  /* ---- PmaxLayout (node-id=19649-32052): eight measured steps ----
+     None of the eight below is a `spacing/*` variable, and that is not a
+     partial miss: this node binds no size variable at all.
+     get_variable_defs(19649:32052) returns 19 entries — brand/logo,
+     brand/logo-inverse, brand/secondary, text/primary, text/disclaimer,
+     shadow/disclaimer, icon/default, icon/white, the black, white and
+     active-red primitives, the font-family, font-size and font-weight atoms
+     and the nav/menu, body/default-strong, subtitle/large and title/large
+     styles — not one of them a size. get_design_context on the same node
+     writes every colour and font as a `var(--...)` reference and every metric
+     below as a bare literal, which is the same signature the 140 and 860 steps
+     above were registered on. So all eight are measured, not published.
+
+     Registered as one block because they share one source node and one
+     failure mode, not because they are one decision — each line names the
+     frame that authored it. Same silent-failure mode as the 38, 76, 78, 92,
+     96, 140, 180 and 860 steps: Tailwind answers an unregistered number with
+     the built-in `n * 0.25rem`, four times too large, and neither the hardcode
+     hook nor `verify:tokens` checks for a wrong built-in step. The 200 is the
+     worst of the eight — unregistered, `px-200` resolves to 50rem of padding
+     per side on a 1200-square canvas, which leaves the copy block no width at
+     all rather than merely the wrong width.
+
+     All eight take numeric names: all are whole numbers on this integer scale,
+     so the numeric-name exception in ./README.md applies (unlike
+     --spacing-benefit-label below, a fraction between two steps). All eight
+     names are free — a repo-wide grep for every spacing utility followed by
+     30, 33, 42, 46, 50, 88, 144 or 200 returned nothing outside the component
+     that requested them.
+
+     Two density notes, both signals rather than objections. 88 lands in the
+     crowded band, which now reads 76 78 80 82 88 92 96; the 76 step above says
+     a third neighbour there means Figma needs a real scale in that range, and
+     that signal is already recorded as follow-up 8 in docs/design-tokens.md,
+     so this step strengthens it rather than opening a new one. The other seven
+     turn the 30-56 range into 30 32 33 36 38 40 42 44 46 48 50 56, which is
+     dense for the same reason and is recorded in the same place. */
+
+  /* Left and right padding of the Disclaimer frame (19649:32054). */
+  --spacing-30: 1.875rem;
+
+  /* Top and left inset of the Logo/LG instance (19649:32053), which Figma
+     places at an absolute x and y of 33 inside the 1200 root. One step covers
+     both axes: Figma authors the same number twice here, so this is a single
+     decision, not two that could drift. It is a cause, not a consequence — the
+     position is authored directly rather than derived from a centring or a
+     padding, which is the test the 19 and 5 slack values in the 76 and 38
+     steps above failed. */
+  --spacing-33: 2.0625rem;
+
+  /* Bottom padding of the Disclaimer frame (19649:32054). */
+  --spacing-42: 2.625rem;
+
+  /* Max height of the disclaimer text (19649:32055). A live constraint, not
+     decoration: at the nav/menu line height one line (24) passes and two (48)
+     get clipped. */
+  --spacing-46: 2.875rem;
+
+  /* Height of the Logo/LG instance (19649:32053). The LogoLG master is 64
+     tall and this instance is resized to 50, so the step belongs to the
+     composition, not to the logo — the same relation the 18 step above records
+     for the Icon/UI master inside Button/Text. Only the height is registered:
+     the instance's 113.501 width follows from the mark's aspect ratio, so
+     naming it would freeze a consequence. */
+  --spacing-50: 3.125rem;
+
+  /* Max height of the Subcopy (19649:32061). Registered even though the Figma
+     copy does not reach it — that text runs two lines (84) at the
+     subtitle/large line height — because the constraint is live from three
+     lines on, and this component takes its copy as a prop. */
+  --spacing-88: 5.5rem;
+
+  /* Max height of the Headline (19649:32060). At the title/large line height
+     of 60 two lines (120) fit and the third (180) is clipped; shorter copy
+     simply hugs. */
+  --spacing-144: 9rem;
+
+  /* Left and right padding of the `Copy + CTA btn` frame (19649:32057).
+     The padding is what Figma authors and the 800 width of the Copy frame
+     inside it is what follows (1200 - 2 * 200), so the name goes on the
+     padding — naming the 800 instead would freeze a result and let the inset
+     drift the day the canvas stops being 1200 wide. Same cause-not-consequence
+     test as the 33 step above. */
+  --spacing-200: 12.5rem;
+
+  /* Thinnest visible rule. Role-named, not a numeric step, for two reasons.
+     (a) `--spacing-1` would shadow Tailwind's built-in `h-1`/`p-1`
+     (0.25rem), silently changing every existing and future use of it.
+     (b) A hairline must stay one device pixel; the rem conversion the rest of
+     this scale uses would render it at 1.25px on a 20px root and blur it.
+     Source: the `selected` underline of Button/Text (node-id=19661-3683) is a
+     full-width filled rectangle one unit tall, not a stroke — Figma's own
+     output styles it with a background colour and a height. So it is consumed
+     as `h-hairline` plus `bg-border-focus`, and a border-width token could not
+     express it. For a real CSS border use `border-hairline`, which references
+     this value from design-tokens.css. Figma binds no size variable here. */
+  --spacing-hairline: 1px;
+
+  /* Underline rule of an active nav Tab: its thickness, and the gap that
+     offsets it from the label. Role-named rather than numbered, for the same
+     two reasons the hairline above is.
+     (a) `--spacing-2` would shadow Tailwind's built-in `h-2`/`p-2`/`gap-2`
+     (0.5rem), silently retargeting every existing and future use of them —
+     precisely the failure `--spacing-1` was avoided for.
+     (b) The README exception that lets measured values keep numeric names
+     applies only to values sitting ON the scale. This scale starts at 4, so 2
+     is not one of its steps; it is a rule metric below the floor.
+     Kept in px, not rem, on the hairline's argument: this is a drawn rule, and
+     at a 20px root the rem form would land on 2.5 device pixels, blurring the
+     one element whose whole job is to be a crisp brand-coloured bar. Holding it
+     fixed also keeps thickness and gap exactly equal at any root size, which is
+     the relation Figma drew. The label's line box still scales with the root,
+     so the tab still grows with its type — just not by these two units.
+     Source: the Tab component set (node-id=19643-31067) draws the underline as
+     a full-width filled rectangle two units tall, two units below the label
+     (state=active, node-id=19643-31065; state=default hides that same rectangle
+     at zero opacity). get_variable_defs on the active variant returns
+     text/primary, brand/primary, nav/menu and its font atoms and nothing else —
+     no size variable — so both values are measured, not published.
+     One token serves both uses deliberately: they are two metrics of the same
+     drawn element and Figma moves them together (the 28-tall frame is line
+     box 24 + gap + rule). Split it the day they diverge, not before.
+     Consumed as `h-underline` + `bg-brand-primary` and `gap-underline`. No
+     border-width sibling is defined, unlike the hairline: nothing draws this as
+     a real CSS border, and a token nothing can use is a token that gets
+     misused. */
+  --spacing-underline: 2px;
+
+  /* Gap between a benefit icon tile and its two-line label, inside the Benefit
+     Item of the BenefitRow component set (node-id=1-50; tone=white 1:51,
+     tone=black 1:385). Identical in both variants. Consumed as
+     `gap-benefit-label`.
+     Not a `spacing/*` variable in Figma: get_variable_defs on the Benefit Item
+     (node-id=1-52) returns icon/white, icon/default, text/inverse and the
+     nav/menu style with its font-family/font-size/font-weight atoms, and the
+     same call on the tone=black root (node-id=1-385) returns only icon/default,
+     icon/white and text/primary. Neither response contains a single size
+     variable, so this is a measured value — get_design_context(1:386) writes it
+     as a bare literal gap while every other frame here is likewise unbound.
+     Role-named rather than numbered, on the README rule that the numeric-name
+     exception applies only to values sitting ON the scale. This scale is whole
+     numbers from 4 up; 13.667 is a fraction between the steps 12 and 16 and is
+     not a step of anything. A numeric name would also hit the silent-failure
+     mode the 38/76/78/82/92/96 steps document, and hit it in a worse form:
+     Tailwind v4 accepts fractional numbers on its built-in scale, so an
+     unregistered `gap-13.667` compiles happily to 13.667 * 0.25rem = 3.417rem
+     rather than failing to generate.
+     The value is registered as measured, NOT as a derivation. 13.667 happens to
+     equal 16 * (82 / 96), which looks like a 16 gap drawn against the 96-square
+     Icon/Benefit master (the --spacing-96 step above) and then scaled down to
+     the 82 the instance is resized to (the --spacing-82 step above). That is a
+     plausible story and it is only a story: nothing in the file records an
+     original 16, and expressing this token as a calc() over those two steps
+     would tie a BenefitRow gap to an icon master size and a header inset — the
+     exact semantic coupling --spacing-92 and --spacing-82 were registered to
+     break. If Figma ever publishes the relation, revisit this token.
+     Emitted as rem like the rest of the scale, not px like the two rule metrics
+     above: this is a layout gap, not a drawn line, so it should grow with the
+     user's font size and has no crispness requirement. */
+  --spacing-benefit-label: 0.8542rem;
 }

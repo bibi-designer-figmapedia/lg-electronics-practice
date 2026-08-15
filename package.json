@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "verify:tokens": "node .claude/hooks/check-hardcode.mjs --scan",
+    "verify:process": "node .claude/scripts/verify-process.mjs",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

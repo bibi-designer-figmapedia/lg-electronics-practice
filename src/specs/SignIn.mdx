@@ -1,0 +1,90 @@
+import { Meta, Story, Title } from '@storybook/blocks'
+
+import * as SignInStories from './SignIn.stories'
+
+{/*
+  Sign in 화면정의서 문서 페이지.
+
+  Figma 원본: https://www.figma.com/design/GskFyUHuqkVOzqgytOAenb/?node-id=118-7098
+  원본은 Design 탭에서 본다 — parameters.design 은 SignIn.stories.tsx 에 있다.
+  (애드온 패널은 스토리 Canvas 에만 붙어서 이 문서 페이지에는 탭이 없다.)
+*/}
+
+<Meta of={SignInStories} />
+
+<Title>Sign in 화면정의서</Title>
+
+화면 ID `MBR_010101` · `LG.com > Sign in`
+
+내용은 Figma 원본에서 그대로 옮긴 것이고, 아래는 그 데이터를 `ScreenSpecDoc`
+템플릿에 넘겨 렌더한 결과다. 왼쪽 화면은 그림이 아니라 실제 구현체
+(`src/page/SignIn`)를 그대로 끼운 것이라, 페이지가 바뀌면 이 문서도 같이 바뀐다.
+빨간 ①②③ 은 Figma 시트의 주석 마커이고 Description 표의 01 · 02 · 03 과 1:1로
+대응한다 — 실제 페이지에는 나오지 않는다.
+
+원본과 대조하려면 좌측 사이드바의 **Spec** 스토리로 이동해 **Design** 탭을 연다.
+화면만 따로 보려면 **Pages / SignIn** 으로 간다.
+
+<Story of={SignInStories.Spec} />
+
+## 이 문서가 만들어진 방식
+
+| 파일 | 역할 |
+| --- | --- |
+| `src/specs/types.ts` | 화면정의서 1건의 데이터 계약 (`ScreenSpec`) |
+| `src/specs/ScreenSpecDoc.tsx` | `ScreenSpec` + 화면 슬롯을 Figma 표 모양으로 그리는 템플릿. `SpecMarker` 도 여기 있다 |
+| `src/specs/signIn.spec.ts` | 이 화면의 내용. Figma 문구를 그대로 옮긴 데이터 |
+| `src/page/SignIn/SignIn.tsx` | 화면 구현체. `HeaderGNB` + `FormSignIn` 조립뿐이다 |
+| `src/specs/SignIn.stories.tsx` | `parameters.design` — Design 탭에 Figma 원본 연결 |
+| `src/specs/SignIn.mdx` | 이 문서 페이지 |
+
+## 다른 화면을 추가하려면
+
+`ScreenSpecDoc` 은 화면에 종속되지 않는다. 새 화면 1건은 아래 3개만 추가하면
+되고, 템플릿(`types.ts` · `ScreenSpecDoc.tsx`)은 건드리지 않는다.
+
+1. **`src/specs/<화면>.spec.ts`** — `ScreenSpec` 타입으로 내용을 옮긴다.
+   Figma MCP `get_design_context` 가 돌려준 문구를 **한 글자도 고치지 않는다.**
+   요약하거나 다시 쓰면 도면과 어긋나 문서로서의 값이 사라진다.
+2. **`src/specs/<화면>.stories.tsx`** — `SignIn.stories.tsx` 를 복사해
+   `title` 을 `'Specs/<화면>'` 으로, `parameters.design.url` 을 해당 Figma
+   노드로, `args.spec` 을 1번 파일로, `args.screen` 을 그 화면의 페이지
+   컴포넌트로 바꾼다. `tags: ['!autodocs']` 는 그대로 둔다 — 붙는 MDX 가 있으면
+   전역 autodocs 와 `--docs` 항목이 충돌한다.
+3. **`src/specs/<화면>.mdx`** — 이 파일을 복사해 `<Meta of={…} />` 가 2번을
+   가리키게 한다.
+
+화면이 아직 없으면 `src/page/<화면>/` 을 먼저 만든다. `screen` 은 선택 슬롯이라
+넘기지 않으면 문서에 표만 남는다 — 화면 구현 전에도 문서를 올릴 수 있다.
+
+### 번호 마커를 붙이는 법
+
+`SpecMarker` 는 자기 위치를 모른다. 마커를 붙일 자리는 **화면 쪽이** 정한다.
+Sign in 의 경우 `FormSignIn` 이 `annotations` 슬롯 3개(`title` · `action` ·
+`options`)를 열어 두었고, 슬롯이 대상 블록의 왼쪽 변에 `right-full` 로 정렬한다.
+Figma 는 마커를 페이지 절대좌표(left 715 / top 324 …)로 박아 두었지만 그 좌표에
+대응하는 토큰이 없고, 폼의 내부 간격이 바뀌면 조용히 어긋난다. 블록의 형제로 두면
+옮겨야 할 좌표가 0개가 된다.
+
+다른 화면에 마커가 필요하면 같은 방식으로 그 화면의 컴포넌트에 슬롯을 연다.
+`SpecMarker` 자체는 고칠 필요가 없다.
+
+### 상단 5칸에 대하여
+
+`ScreenSpec` 의 상단 정보는 자유 배열이 아니라 명명 필드 5개
+(`screen` · `screenId` · `screenType` · `location` · `screenKind`) 로
+고정돼 있다. 화면정의서 양식이 항상 같은 5칸이라 칸이 빠지거나 라벨이 어긋나면
+타입 단계에서 걸리는 편이 낫기 때문이다. 양식 자체가 바뀌면 그때 `types.ts` 를
+고친다 — 화면 1건 때문에 고치지는 않는다.
+
+### 토큰에 대하여
+
+문서 프레임(표)의 모든 시각 값은 `src/tokens/` 의 기존 토큰만 쓴다. 표를 위해
+새로 등재한 토큰은 없고, 원본 도면의 값 중 스케일에 없는 것은 가장 가까운
+토큰으로 흡수했다. 흡수하면서 원본과 달라진 3가지(구분선 색조 · 라벨 weight ·
+선 두께 위계)는 `ScreenSpecDoc.tsx` 상단 주석에 기록돼 있다.
+
+화면 쪽에서는 `--spacing-450`(폼 카드 폭) 하나를 새로 등재했다. Figma 가 카드를
+450 고정으로 그려 두었는데 스케일에 그 스텝이 없었고, `FormSignIn` 은 폭을 갖지
+않고 호출부가 정하도록 설계돼 있다. 등재 근거는
+`src/tokens/spacing.tokens.css` 의 해당 항목에 적혀 있다.

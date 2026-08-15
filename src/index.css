@@ -1,6 +1,93 @@
 @import 'tailwindcss';
 
 /*
+ * Webfont. `--font-headline` and `--font-text` in tokens/typography.tokens.css
+ * name "LG EI Headline" and "LG EI Text" because Figma's font-family/headline
+ * and font-family/text variables do, but naming a family does not load it:
+ * without these @font-face rules every text component silently falls back to a
+ * system font, so rendered metrics differ from the Figma source and from one
+ * machine to the next.
+ *
+ * Self-hosted from public/fonts/ rather than from a package: LG EI is a licensed
+ * LG typeface with no npm distribution, which is why the @fontsource/noto-sans-kr
+ * import that used to sit here is gone along with the family it loaded.
+ * The .otf files are NOT in this repository — .gitignore excludes them because
+ * this repo is public. See ../README.md for how to obtain and place them. Until
+ * they are placed both families resolve to the fallback chain declared in
+ * tokens/typography.tokens.css, so text still renders but its metrics are not
+ * the Figma ones.
+ *
+ * Storybook serves these through `staticDirs: ['../public']` in
+ * .storybook/main.ts; Vite serves public/ at the root on its own. Both resolve
+ * the absolute `/fonts/...` paths below.
+ *
+ * Six faces, three weights per family. Regular and SemiBold are the two the
+ * token layer defines (--font-weight-regular, --font-weight-semibold) and the
+ * two every Figma text style binds. Bold is declared because the typeface ships
+ * it, but no token selects it: adding a bold step is a token-layer decision
+ * Figma has not made — its Typography collection publishes no font-weight/bold.
+ *
+ * NOTE the file-name casing. The Headline family ships `-Semibold` (lowercase b)
+ * and the Text family ships `-SemiBold` (uppercase B). Figma names them the same
+ * inconsistent way: the four title/* styles report `style: Semibold` while the
+ * text styles report `style: SemiBold`. This is not a typo in either place —
+ * "normalising" one makes its src 404 and that face silently never loads.
+ *
+ * The weights below are written as plain numbers because a @font-face descriptor
+ * is not a property: it does not accept var(), so --font-weight-* cannot be
+ * referenced here. These numbers state which face each file *is*, not a styling
+ * choice — the choice is made by the type utilities, which do use the tokens.
+ */
+
+@font-face {
+  font-family: 'LG EI Headline';
+  src: url('/fonts/LGEIHeadline-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LG EI Headline';
+  src: url('/fonts/LGEIHeadline-Semibold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LG EI Headline';
+  src: url('/fonts/LGEIHeadline-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LG EI Text';
+  src: url('/fonts/LGEIText-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LG EI Text';
+  src: url('/fonts/LGEIText-SemiBold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LG EI Text';
+  src: url('/fonts/LGEIText-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
  * Design token SSOT. Must come after the Tailwind import so its `@theme` keys
  * are compiled into utility classes. See src/tokens/README.md.
  */
