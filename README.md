@@ -8,6 +8,7 @@ Figma 디자인 시스템을 코드로 변환하는 하네스. 규칙·완료 �
 
 ```bash
 npm install
+npm run dev              # 앱 개발 서버
 npm run storybook        # 컴포넌트 갤러리
 npm run verify:tokens    # 하드코딩 0건 검사
 npm run verify:process   # 컴포넌트 4단계 산출물 검사
@@ -16,18 +17,11 @@ npm run typecheck
 
 ---
 
-## 폰트 설치 — 별도로 받아야 한다 (필수)
+## 폰트 — 저장소에 포함되어 있다 (별도 설치 없음)
 
-**이 저장소에는 폰트 파일이 없다.** `npm install` 로 받아지지 않으며, 파일을 넣지 않으면
-모든 텍스트가 폴백 폰트로 렌더된다 — 에러는 나지 않고 조용히 어긋난다.
-
-이 디자인 시스템은 **LG EI** 를 쓴다. LG 전용 라이선스 폰트라 npm 배포본이 없고,
-**이 저장소는 공개**이므로 `.gitignore` 가 `public/fonts/*.otf` 를 제외한다. 커밋해도
-되는지는 저장소 소유자가 판단한다.
-
-### 1. 파일 6개를 `public/fonts/` 에 넣는다
-
-사내 브랜드 자산 배포처에서 받아 아래 이름 그대로 배치한다.
+이 디자인 시스템은 **LG EI** 를 쓴다. npm 배포본이 없는 폰트라 파일 6개를
+`public/fonts/` 에 **직접 커밋해 두었다.** clone 후 `npm install` → `npm run dev`
+(또는 `npm run storybook`) 만 하면 그대로 적용된다 — 받아서 넣는 단계는 없다.
 
 ```
 public/fonts/
@@ -46,23 +40,24 @@ public/fonts/
 > macOS 기본 파일시스템은 대소문자를 구분하지 않아 로컬에서는 통과하고 CI(리눅스)에서만
 > 깨질 수 있다.
 
-### 2. 확인
+### 폰트가 실제로 로드됐는지 확인하려면
 
-```bash
-ls public/fonts/*.otf | wc -l   # 6 이어야 한다
-npm run storybook
+폰트가 OS 에 설치돼 있으면 로드에 실패해도 화면은 멀쩡해 보인다. 그래서 눈으로 보지 말고
+**Network 응답 코드**로 확인한다 — 개발자도구 Network 를 열고 `otf` 로 필터해 6개가 전부
+200 인지 본다. 브라우저는 페이지에서 실제로 쓰인 face 만 내려받으므로(Bold 700 은 어떤
+토큰도 선택하지 않는다) 6개를 한 번에 보려면 콘솔에서 강제로 로드한다.
+
+```js
+await Promise.all([400, 600, 700].flatMap((w) =>
+  ['LG EI Headline', 'LG EI Text'].map((f) => document.fonts.load(`${w} 16px "${f}"`))
+))
 ```
-
-Storybook 의 **Tokens → Typography** 스토리를 열어 `--font-headline` · `--font-text` 가
-각각 `LG EI Headline` · `LG EI Text` 로 표시되는지 보고, 개발자도구 Computed →
-Rendered Fonts 에서 실제로 그 face 가 쓰였는지 확인한다. 변수 이름이 맞게 나오는 것과
-face 가 실제로 로드된 것은 별개다 — 이름만 맞고 파일이 없으면 폴백으로 렌더된다.
 
 ### 폰트가 코드에 걸리는 경로
 
 | 위치 | 역할 |
 | --- | --- |
-| `public/fonts/*.otf` | 파일 (추적 안 됨) |
+| `public/fonts/*.otf` | 파일 6개 — 저장소에 커밋됨 |
 | `src/index.css` | `@font-face` 6개 — 패밀리 2개 × Regular 400 · SemiBold 600 · Bold 700, `font-display: swap` |
 | `src/tokens/typography.tokens.css` | `--font-headline` · `--font-text` 토큰과 폴백 체인, `type-*` 유틸리티 15개 |
 | `.storybook/main.ts` | `staticDirs: ['../public']` — 없으면 Storybook 에서만 404 난다 |
