@@ -43,7 +43,13 @@ export const HeadingOutline: Story = {
 
     /* h1 은 페이지 제목 하나뿐이다. 페이지 전체에서 센다. */
     expect(canvas.getAllByRole('heading', { level: 1 })).toHaveLength(1)
-    expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('Title')
+
+    /* 히어로 제목은 두 줄이다. toHaveTextContent 는 요소의 textContent 쪽 공백을 정규화해
+       개행을 공백으로 만들어 버리므로, 하드 개행 자체를 판정하려면 textContent 를 그대로
+       비교해야 한다 — 개행이 사라지면 한 줄로 보이고 그것이 이 판정이 막는 회귀다. */
+    expect(canvas.getByRole('heading', { level: 1 }).textContent).toBe(
+      'Lorem ipsum dolor sit\nametap consectetur',
+    )
 
     /*
      * h2 · h3 는 main 안에서만 센다. Footer 가 컬럼 제목 9개(Shop · TV/Audio · Appliances ·

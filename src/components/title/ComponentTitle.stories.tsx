@@ -84,10 +84,23 @@ export const ButtonCase: Story = {
   args: { case: 'button', ...FIGMA_CONTENT.button },
 }
 
-/** `Case=tab`(19661:21036) — 제목 + 설명, 아래에 hairline 구분선. */
+/**
+ * `Case=tab`(19661:21036) — 제목 + 설명, 아래에 hairline 구분선.
+ *
+ * 이 Case 는 좌우 여백을 스스로 갖지 않는다(컴포넌트 주석의 "좌우 여백을 컴포넌트가 갖지
+ * 않는 이유" 참고). 그래서 story 가 페이지와 같은 컨테이너 래퍼를 둘러 준다 — 래퍼 없이
+ * 놓으면 글자가 화면 끝에 붙고, 그것은 컴포넌트의 결함이 아니라 문맥이 빠진 상태다.
+ */
 export const Tab: Story = {
   parameters: { design: { type: 'figma', url: FIGMA_CASE_URL.tab } },
   args: { case: 'tab', ...FIGMA_CONTENT.tab },
+  render: (args) => (
+    <div className="w-full px-gutter">
+      <div className="mx-auto w-full max-w-container">
+        <ComponentTitle {...args} />
+      </div>
+    </div>
+  ),
 }
 
 /**

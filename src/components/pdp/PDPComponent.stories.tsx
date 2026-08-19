@@ -106,7 +106,7 @@ const meta = {
      컴포넌트의 일부가 아니다. */
   decorators: [
     (Story) => (
-      <div className="bg-bg-warm px-viewport-inset py-48">
+      <div className="bg-bg-warm px-gutter py-48">
         <Story />
       </div>
     ),

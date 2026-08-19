@@ -33,8 +33,9 @@ import { IconUI, type IconUIType } from '../icons/IconUI'
  *                           행간 20
  *   상하 padding            spacing/20              --spacing-20                 py-20
  *   다음↔닫기 간격          spacing/24              --spacing-24                 gap-24
- *   좌우 인셋               변수 없음, 실측 240     --spacing-viewport-inset     px-viewport-inset
- *   최대 너비               변수 없음, 실측 1920    --container-viewport         max-w-viewport
+ *   밴드 좌우 거터          layout/gutter 24        --spacing-gutter             px-gutter
+ *   콘텐츠 폭 상한          변수 없음, 실측 1440    --container-container        max-w-container
+ *   (좌우 인셋 240 은 위 둘의 조합에서 나온다 — 아래 "인셋을 패딩으로 쓰지 않는 이유")
  *   아이콘 박스             변수 없음, 실측 16      --spacing-16                 size-16
  *
  *   새 토큰은 하나도 만들지 않았다. 위 5개 변수는 전부 기존 토큰에 이미 대응이 있었고,
@@ -57,8 +58,8 @@ import { IconUI, type IconUIType } from '../icons/IconUI'
  *   4. 상태를 갖지 않는다. 이전/다음/닫기는 전부 핸들러 prop 으로 호출부에 넘긴다 —
  *      Figma 에 상태 variant 가 없고, 닫힘 여부는 이 바가 아니라 호출부의 관심사다.
  *      핸들러를 주지 않아도 버튼 3개는 그대로 렌더된다(Figma 원본이 항상 3개다).
- *   5. 너비는 컴포넌트가 정하지 않는다. `w-full` 로 부모 폭을 채우고 Figma 프레임 폭인
- *      max-w-viewport 에서 멈춘다.
+ *   5. 너비는 컴포넌트가 정하지 않는다. `w-full` 로 부모 폭을 채우고 상한도 하한도 걸지
+ *      않는다. Figma 프레임 폭 1920 은 콘텐츠 폭 1440 + 거터로 재현된다(아래 항목 참고).
  *
  * Figma 에 없어서 발명한 것 — aria-label 3개
  *   원본에는 아이콘의 용도 주석이 없다. 배치(왼쪽 arrowLeft / 오른쪽 arrowRight + close)
@@ -114,6 +115,22 @@ import { IconUI, type IconUIType } from '../icons/IconUI'
  *     여기서 색 유틸리티만 그것으로 바꿨다. 두께와 구조는 Tab · RightMenu 와 그대로 같다.
  *     Figma 에는 대응 변수가 없다 — get_variable_defs(19661:4208) 가 focus 관련 변수를
  *     반환하지 않는 것을 확인했고, 그 사실과 값 선택 근거는 토큰 정의 주석에 있다.
+ *
+ * 인셋을 패딩으로 쓰지 않는 이유 (모든 full-bleed 밴드가 공유하는 구조)
+ *   이 밴드는 뷰포트 전체 폭을 쓴다. 좌우 인셋 240 을 루트 padding 으로 직접 주면
+ *   (px-viewport-inset) 그 240 이 어떤 폭에서도 고정이라, 뷰포트가 1920 보다 좁아지는 순간
+ *   콘텐츠가 남은 폭에서 눌리거나 밖으로 넘쳐 가로 스크롤이 생긴다. 밴드에 하한
+ *   (min-w-viewport)을 걸어 막아 보기도 했는데, 그것은 넘침을 없애는 대신 좁은 화면에서
+ *   항상 넘치게 만드는 쪽이었다. 그래서 인셋을 값으로 주지 않고 컨테이너가 만들게 둔다.
+ *     바깥 층   w-full + 배경 + px-gutter        (최소 폭 · 최대 폭 지정 없음)
+ *     안쪽 층   mx-auto w-full max-w-container
+ *   1920 에서 (1920 - 48 - 1440) / 2 + 24 = 240 이 그대로 나온다. 1920 보다 좁으면 상한 1440
+ *   쪽이 먼저 줄어들어 레이아웃이 자연스럽게 좁아지고(가로 스크롤 0), 1920 보다 넓으면 배경은
+ *   화면 전체로 늘고 콘텐츠는 1440 중앙에 남는다. 같은 구조가 full-bleed 밴드 6개
+ *   (HeaderGNB · HeaderNotification · Footer · FuntionalTab · ComponentTitle · HeroBanner)와
+ *   페이지 섹션에 같은 모양으로 들어가 있다.
+ *   --spacing-viewport-inset 토큰은 그대로 있다 — Figma layout/viewport-inset 변수의 대응이고
+ *   토큰 갤러리가 시연한다. 이 파일이 그것을 padding 으로 쓰지 않을 뿐이다.
  */
 
 export interface HeaderNotificationProps extends HTMLAttributes<HTMLDivElement> {
@@ -178,50 +195,57 @@ export function HeaderNotification({
 }: HeaderNotificationProps) {
   return (
     <div
-      className={`flex w-full max-w-viewport items-center justify-between bg-surface-inverse px-viewport-inset py-20 ${className}`}
+      className={`flex w-full items-center bg-surface-inverse px-gutter py-20 ${className}`}
       {...props}
     >
-      {/* 19661:4096 — type=arrowLeft (아래 variant 확인 근거 참고) */}
-      <NotificationIconButton
-        type="arrowLeft"
-        label="Previous notification"
-        onClick={onPrev}
-      />
       {/*
-       * 19661:4009 NotificationText — Figma 에서 flex-1 로 남는 폭을 전부 먹고 그 안에서
-       * 가운데 정렬된다. min-w-0 이 없으면 긴 메시지가 flex 아이템의 기본 최소 폭에 걸려
-       * 좌우 아이콘을 밀어낸다.
+       * 안쪽 콘텐츠 층 — 폭 상한 1440 을 잡고 가운데 선다. 좌우 인셋 240 은 이 층이 아니라
+       * 루트의 px-gutter 와 이 상한의 조합에서 나온다(아래 "인셋을 패딩으로 쓰지 않는 이유").
+       * justify-between 도 루트가 아니라 여기 있다 — 나눌 대상은 뷰포트 폭이 아니라 콘텐츠 폭이다.
        */}
-      <div className="flex min-w-0 flex-1 items-center justify-center">
+      <div className="mx-auto flex w-full max-w-container items-center justify-between">
+        {/* 19661:4096 — type=arrowLeft (아래 variant 확인 근거 참고) */}
+        <NotificationIconButton
+          type="arrowLeft"
+          label="Previous notification"
+          onClick={onPrev}
+        />
         {/*
-         * Figma 텍스트 노드는 줄바꿈 없는 한 줄이라 export 에 whitespace-pre 가 붙는다.
-         * 그대로 쓰면 좁은 폭에서 줄바꿈을 막아 바 밖으로 흘러나가므로 pre-wrap 을
-         * 쓴다 — 연속 공백은 보존하면서 줄바꿈은 허용하는 쪽이다.
-         *
-         * 이 한 칸이 실제로 눈에 보이는 차이다. Figma 원문은 문장 끝과 Sign-up
-         * 사이에 공백 두 개를 두는데, 기본 white-space 는 그것을 한 칸으로 접는다.
-         * 접힌 상태에서는 Sign-up 앞 간격이 Figma 대비 좁고 문구 전체 잉크 폭도
-         * 짧아진다. pre-wrap 을 걸면 잉크 시작·끝·폭·간격 네 수치가 Figma 와
-         * 일치한다 (design-reviewer 6번 항목 측정).
+         * 19661:4009 NotificationText — Figma 에서 flex-1 로 남는 폭을 전부 먹고 그 안에서
+         * 가운데 정렬된다. min-w-0 이 없으면 긴 메시지가 flex 아이템의 기본 최소 폭에 걸려
+         * 좌우 아이콘을 밀어낸다.
          */}
-        <p className="type-body-default text-center whitespace-pre-wrap text-text-inverse">
-          {children}
-        </p>
-      </div>
-      {/* 19661:4207 NotificationActions — 두 아이콘 사이만 spacing/24 다. */}
-      <div className="flex shrink-0 items-center gap-24">
-        {/* 19661:4100 — type=arrowRight */}
-        <NotificationIconButton
-          type="arrowRight"
-          label="Next notification"
-          onClick={onNext}
-        />
-        {/* 19661:4186 — type=close */}
-        <NotificationIconButton
-          type="close"
-          label="Close notification"
-          onClick={onClose}
-        />
+        <div className="flex min-w-0 flex-1 items-center justify-center">
+          {/*
+           * Figma 텍스트 노드는 줄바꿈 없는 한 줄이라 export 에 whitespace-pre 가 붙는다.
+           * 그대로 쓰면 좁은 폭에서 줄바꿈을 막아 바 밖으로 흘러나가므로 pre-wrap 을
+           * 쓴다 — 연속 공백은 보존하면서 줄바꿈은 허용하는 쪽이다.
+           *
+           * 이 한 칸이 실제로 눈에 보이는 차이다. Figma 원문은 문장 끝과 Sign-up
+           * 사이에 공백 두 개를 두는데, 기본 white-space 는 그것을 한 칸으로 접는다.
+           * 접힌 상태에서는 Sign-up 앞 간격이 Figma 대비 좁고 문구 전체 잉크 폭도
+           * 짧아진다. pre-wrap 을 걸면 잉크 시작·끝·폭·간격 네 수치가 Figma 와
+           * 일치한다 (design-reviewer 6번 항목 측정).
+           */}
+          <p className="type-body-default text-center whitespace-pre-wrap text-text-inverse">
+            {children}
+          </p>
+        </div>
+        {/* 19661:4207 NotificationActions — 두 아이콘 사이만 spacing/24 다. */}
+        <div className="flex shrink-0 items-center gap-24">
+          {/* 19661:4100 — type=arrowRight */}
+          <NotificationIconButton
+            type="arrowRight"
+            label="Next notification"
+            onClick={onNext}
+          />
+          {/* 19661:4186 — type=close */}
+          <NotificationIconButton
+            type="close"
+            label="Close notification"
+            onClick={onClose}
+          />
+        </div>
       </div>
     </div>
   )

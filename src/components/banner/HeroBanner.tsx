@@ -39,9 +39,9 @@ import { BannerImage } from './BannerImage'
  * 값 자체는 여기 적지 않는다(레이어 3 hook 대상). 값은 src/tokens/ 를 볼 것.
  *
  *   용도                   Figma 변수 / 실측       코드 토큰                  유틸리티
- *   루트 폭                layout/viewport 1920    --container-viewport       max-w-viewport
+ *   밴드 좌우 거터         layout/gutter 24        --spacing-gutter           px-gutter
  *   루트 높이              실측 720                -                          (BannerImage 의 aspect-8/3)
- *   카피 열 좌측 인셋      실측 240.02             --spacing-viewport-inset   pl-viewport-inset
+ *   카피 열 폭 상한        실측 1440               --container-container      max-w-container
  *   카피 열 상단 인셋      실측 78.64              --spacing-banner-padding   pt-banner-padding
  *   카피 열 하단 인셋      실측 18.36              --spacing-20               pb-20
  *   카피 열 폭             실측 542                --container-banner-copy    w-banner-copy
@@ -88,9 +88,10 @@ import { BannerImage } from './BannerImage'
  *   맡는다(absolute inset-0).
  *
  * 크기를 박지 않고 비율로 옮긴 이유
- *   루트는 Figma 에서 1920 x 720 이다. 폭은 max-w-viewport 로 상한만 잡고 w-full 로
- *   채운다. 이 저장소의 다른 1920 루트 프레임들이 같은 방식이다(FuntionalTab ·
- *   ComponentTitle 이 w-full max-w-viewport 를 쓴다). 높이는 이 파일이 정하지 않는다.
+ *   루트는 Figma 에서 1920 x 720 이다. 폭은 w-full 로 채우기만 하고 상한도 하한도 걸지
+ *   않는다 — 1920 은 콘텐츠 폭 1440 + 거터로 재현된다(아래 항목 참고). 이 저장소의 다른
+ *   1920 루트 프레임들이 같은 방식이다(FuntionalTab · ComponentTitle 이 같은 조합을 쓴다).
+ *   높이는 이 파일이 정하지 않는다.
  *
  * Disclaimer 를 p 로 두고 하드 개행을 살린다
  *   Figma 원본(19832:1320)은 body/small 두 줄이다 — get_design_context 가 이 레이어를
@@ -106,6 +107,22 @@ import { BannerImage } from './BannerImage'
  *   기본값(둘 다 true)이 적용된다. 같은 기본값을 두 파일에 적으면 조용히 어긋난다.
  *
  * 프레젠테이셔널 컴포넌트다. 내부 state 가 없고 Figma 에 없는 옵션 · variant 도 없다.
+ *
+ * 인셋을 패딩으로 쓰지 않는 이유 (모든 full-bleed 밴드가 공유하는 구조)
+ *   이 밴드는 뷰포트 전체 폭을 쓴다. 좌우 인셋 240 을 루트 padding 으로 직접 주면
+ *   (px-viewport-inset) 그 240 이 어떤 폭에서도 고정이라, 뷰포트가 1920 보다 좁아지는 순간
+ *   콘텐츠가 남은 폭에서 눌리거나 밖으로 넘쳐 가로 스크롤이 생긴다. 밴드에 하한
+ *   (min-w-viewport)을 걸어 막아 보기도 했는데, 그것은 넘침을 없애는 대신 좁은 화면에서
+ *   항상 넘치게 만드는 쪽이었다. 그래서 인셋을 값으로 주지 않고 컨테이너가 만들게 둔다.
+ *     바깥 층   w-full + 배경 + px-gutter        (최소 폭 · 최대 폭 지정 없음)
+ *     안쪽 층   mx-auto w-full max-w-container
+ *   1920 에서 (1920 - 48 - 1440) / 2 + 24 = 240 이 그대로 나온다. 1920 보다 좁으면 상한 1440
+ *   쪽이 먼저 줄어들어 레이아웃이 자연스럽게 좁아지고(가로 스크롤 0), 1920 보다 넓으면 배경은
+ *   화면 전체로 늘고 콘텐츠는 1440 중앙에 남는다. 같은 구조가 full-bleed 밴드 6개
+ *   (HeaderGNB · HeaderNotification · Footer · FuntionalTab · ComponentTitle · HeroBanner)와
+ *   페이지 섹션에 같은 모양으로 들어가 있다.
+ *   --spacing-viewport-inset 토큰은 그대로 있다 — Figma layout/viewport-inset 변수의 대응이고
+ *   토큰 갤러리가 시연한다. 이 파일이 그것을 padding 으로 쓰지 않을 뿐이다.
  */
 
 export interface HeroBannerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
@@ -154,7 +171,7 @@ export function HeroBanner({
 }: HeroBannerProps) {
   return (
     /* 19832:1364 — 사진과 카피 열을 겹치는 배너 한 칸. */
-    <div className={`relative w-full max-w-viewport ${className}`} {...props}>
+    <div className={`relative w-full ${className}`} {...props}>
       {/* 19832:1365 BannerImage — 정상 흐름에 두어 이 배너의 높이를 정하게 한다.
           위치 클래스를 넘기지 않는 이유는 위 "BannerImage 를 정상 흐름에 둔 이유" 참고. */}
       <BannerImage src={src} alt={alt} />
@@ -163,23 +180,29 @@ export function HeroBanner({
        * absolute left/top 으로 놓고 자식 사이에 고정 간격을 주지만, 코드는 인셋 +
        * justify-between 으로 옮긴다. 그러면 자식 사이의 간격이 배너 높이에서 따라 나오는
        * 결과가 되고, Figma 가 그린 326 을 상수로 굳히지 않아도 된다.
+       *
+       * 두 겹인 이유는 다른 밴드와 같다(아래 "인셋을 패딩으로 쓰지 않는 이유") — 바깥이
+       * 사진 위 전체를 덮으면서 거터 24 만 갖고, 안쪽이 콘텐츠 폭 1440 을 잡아 가운데 선다.
+       * 카피 열은 그 1440 의 왼쪽 끝에서 시작하므로 1920 에서 240 이 된다.
        */}
-      <div className="absolute inset-0 flex flex-col items-start justify-between pt-banner-padding pb-20 pl-viewport-inset">
-        {/* 19832:1349 MainContentTitle — 폭 542 는 그 컴포넌트가 스스로 갖는다. */}
-        <MainContentTitle
-          headline={headline}
-          headingLevel={headingLevel}
-          eyebrow={eyebrow}
-          subcopy={subcopy}
-          showEyebrow={showEyebrow}
-          showSubcopy={showSubcopy}
-        />
-        {showDisclaimer ? (
-          /* 19832:1320 Disclaimer (optional) */
-          <p className="type-body-small w-banner-copy whitespace-pre-line text-text-primary">
-            {disclaimer}
-          </p>
-        ) : null}
+      <div className="absolute inset-0 px-gutter">
+        <div className="mx-auto flex h-full w-full max-w-container flex-col items-start justify-between pt-banner-padding pb-20">
+          {/* 19832:1349 MainContentTitle — 폭 542 는 그 컴포넌트가 스스로 갖는다. */}
+          <MainContentTitle
+            headline={headline}
+            headingLevel={headingLevel}
+            eyebrow={eyebrow}
+            subcopy={subcopy}
+            showEyebrow={showEyebrow}
+            showSubcopy={showSubcopy}
+          />
+          {showDisclaimer ? (
+            /* 19832:1320 Disclaimer (optional) */
+            <p className="type-body-small w-banner-copy whitespace-pre-line text-text-primary">
+              {disclaimer}
+            </p>
+          ) : null}
+        </div>
       </div>
     </div>
   )

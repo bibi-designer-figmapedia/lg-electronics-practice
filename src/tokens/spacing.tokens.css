@@ -141,18 +141,21 @@
      92 is the left inset of the Default Header/GNB bar (node-id=19643-30719),
      a measured frame value with no Figma variable bound to it. It was
      registered here as `--spacing-92` while the bar positioned its logo with
-     `absolute left-92`. The bar no longer does: it pads its own root and lets
-     the logo sit first in the flow, so the value is now an *inset* and lives in
-     ./layout.tokens.css as `--spacing-gnb-inset` next to the two insets it
-     belongs beside (viewport-inset 240, banner-inset 160). The numeric step was
-     removed rather than left unreferenced, because a step nothing consumes is a
-     step the next reader spends the value on something unrelated.
-     What the old comment recorded and is still true: 92 must not be written as
-     a sum of existing steps (`left-80` + `ml-12` is exact but ties a header
-     metric to the Button/Web `min-width: 80` constraint and a Figma step), and
-     it must not be left unnamed, because Tailwind's built-in scale resolves an
-     unregistered `*-92` to 92 * 0.25rem without failing. Both hazards are now
-     handled by the role-named token, which is why no numeric step is needed. */
+     `absolute left-92`. The bar stopped doing that (it pads its own root and
+     lets the logo sit first in the flow), the value moved to
+     ./layout.tokens.css as the role-named `--spacing-gnb-inset`, and then Figma
+     moved the logo inside GNBContent so the bar's inset became 240 — the shared
+     --spacing-viewport-inset. Both the numeric step and the gnb inset token are
+     therefore gone: 92 is no longer a value this design system holds anywhere.
+     Steps nothing consumes were removed rather than left unreferenced, because
+     a step nothing consumes is a step the next reader spends on something
+     unrelated.
+     What the old comment recorded and is still true, should 92 ever come back:
+     it must not be written as a sum of existing steps (`left-80` + `ml-12` is
+     exact but ties a header metric to the Button/Web `min-width: 80` constraint
+     and a Figma step), and it must not be left unnamed, because Tailwind's
+     built-in scale resolves an unregistered `*-92` to 92 * 0.25rem without
+     failing. Register it from the Figma value of that day, role-named. */
 
   /* Not a `spacing/*` variable in Figma: the left/right inset of the "Link"
      frame of the secondary Header/GNB variant (node-id=19655-33547, inside
@@ -505,8 +508,10 @@
      plausible story and it is only a story: nothing in the file records an
      original 16, and expressing this token as a calc() over those two steps
      would tie a BenefitRow gap to an icon master size and a header inset — the
-     exact semantic coupling the two header inset tokens (--spacing-gnb-inset
-     in ./layout.tokens.css and --spacing-82 above) were registered to break. If Figma ever publishes the relation, revisit this token.
+     exact semantic coupling the header inset tokens (--spacing-82 above, and
+     --spacing-gnb-inset until the GNB bar moved to the shared 240 inset and it
+     was removed) were registered to break. If Figma ever publishes the relation,
+     revisit this token.
      Emitted as rem like the rest of the scale, not px like the two rule metrics
      above: this is a layout gap, not a drawn line, so it should grow with the
      user's font size and has no crispness requirement. */

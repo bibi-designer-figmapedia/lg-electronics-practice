@@ -133,11 +133,23 @@ const CATEGORY_ITEMS: CategoryMenuItem[] = [
 const HERO = {
   src: sampleBannerImage,
   alt: 'LG 인스타뷰 냉장고가 놓인 주방',
-  eyebrow: 'Eyebrow',
-  headline: 'Title',
-  /* prop 이름만 description -> subcopy 로 바뀌었다. 이 페이지의 Figma 원본이 그린 문구는
-     그대로다 — 이름 변경이 화면 내용을 바꾸지 않게 값은 손대지 않았다. */
-  subcopy: 'Description',
+  /* 카피 3개는 HeroBanner.stories.tsx 의 FIGMA_CONTENT 와 같은 문구다 — 즉 MainContentTitle
+     컴포넌트 원본(19832:1348)이 그린 문구이고, headline 의 개행도 그 원본이 두 줄로 그린
+     것이다(근거는 MainContentTitle.tsx 의 "headline 의 하드 개행을 살린다").
+     eyebrow 의 "ipsumdolor" 는 오타가 아니라 원본 그대로다.
+
+     ⚠ 이 페이지 자신의 Figma 원본과는 다르다 (숨기지 않고 적는다)
+       직전 판은 'Eyebrow' · 'Title' · 'Description' 세 플레이스홀더를 갖고 있었고, 그
+       문구는 이 페이지의 Figma 노드가 그린 것이라고 이전 주석이 기록해 뒀다. 이번에는
+       요청자가 컴포넌트 원본 문구를 쓰기로 확정했다 — headline 이 한 줄('Title')이 아니라
+       두 줄로 보여야 한다는 요청이고, eyebrow · subcopy 도 같은 원본으로 맞췄다.
+       그 결과 히어로 카피는 이 페이지 노드가 아니라 MainContentTitle 노드를 출처로 갖는다.
+       이 세션에서 페이지 노드(183:10010)를 다시 읽어 대조하지는 않았다 — 위 "이전 주석이
+       기록해 뒀다" 는 그 기록의 인용이고 이번에 재확인한 사실이 아니다.
+       되돌리려면 플레이스홀더 3개로 되돌리는 것이 아니라 페이지 노드를 먼저 다시 읽을 것. */
+  eyebrow: 'Lorem ipsumdolor sit amet',
+  headline: 'Lorem ipsum dolor sit\nametap consectetur',
+  subcopy: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
 }
 
 /* 출처: FuntionalTab.stories.tsx 의 DESCRIPTION. 7칸이 전부 같은 문구다. */
@@ -306,7 +318,7 @@ const FOOTER_COLUMNS: FooterColumn[] = [
 export function PDP() {
   return (
     /* 183:10007 Page/PDP */
-    <div className="mx-auto flex w-full max-w-viewport flex-col items-start bg-bg-warm">
+    <div className="flex w-full flex-col items-start bg-bg-warm">
       {/* 183:10008 Navigation — override 없음. 핸들러는 페이지가 정하지 않는다. */}
       <Navigation notification={NOTIFICATION_MESSAGE} items={CATEGORY_ITEMS} />
 
@@ -324,19 +336,28 @@ export function PDP() {
 
         {/* 183:10011 categoryArea */}
         <div className="flex w-full flex-col items-start py-8">
-          {/* 183:10012 ComponentTitle Case=tab — 아래 구분선을 스스로 갖는다. */}
-          <ComponentTitle
-            case="tab"
-            headingLevel={2}
-            title={CATEGORY_TITLE.title}
-            description={CATEGORY_TITLE.description}
-          />
+          {/*
+            * 183:10012 ComponentTitle Case=tab — 배경이 없는 일반 섹션이라 페이지가 주는
+            * 컨테이너 래퍼 안에 둔다. 래퍼 조합(px-gutter + mx-auto max-w-container)은 아래
+            * contents 섹션과 같은 것이고, 그래서 제목의 좌측 라인이 "LG OLED" 와 카드들과
+            * 픽셀 단위로 같아진다. 컴포넌트 자신은 좌우 여백도 폭도 갖지 않는다.
+            */}
+          <div className="w-full px-gutter">
+            <div className="mx-auto w-full max-w-container">
+              <ComponentTitle
+                case="tab"
+                headingLevel={2}
+                title={CATEGORY_TITLE.title}
+                description={CATEGORY_TITLE.description}
+              />
+            </div>
+          </div>
           {/* 183:10013 FuntionalTab — 화살표 핸들러는 페이지가 정하지 않는다. */}
           <FuntionalTab items={TAB_ITEMS} />
         </div>
 
         {/* 183:10014 contents */}
-        <div className="flex w-full flex-col items-center gap-48 px-viewport-inset py-48">
+        <div className="flex w-full flex-col items-center gap-48 px-gutter py-48">
           {/* 183:10015 PDPComponent KeyBenefitSummary — "Read More" 링크를 이미 갖고 있다. */}
           <PDPComponent
             variant="keyBenefitSummary"

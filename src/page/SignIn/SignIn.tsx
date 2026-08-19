@@ -86,7 +86,7 @@ export interface SignInProps {
 /** Figma "page/SignIn" 의 코드 정본. */
 export function SignIn({ annotations }: SignInProps) {
   return (
-    <div className="flex w-full max-w-viewport flex-col items-start bg-bg-warm">
+    <div className="flex w-full flex-col items-start bg-bg-warm">
       {/* 118:7101 */}
       <HeaderGNB variant="secondary" items={[]} />
 

@@ -37,9 +37,10 @@ import { HeaderNotification, type HeaderNotificationProps } from './HeaderNotifi
  *   못한다. HeaderNotification 이 높이 60 을 padding 파생으로 둔 것과 같은 판단이다.
  *
  * 폭 1920 을 루트에 걸지 않은 이유
- *   두 자식이 각자 `w-full max-w-viewport`(= --container-viewport)로 이미 1920 에서 멈춘다.
- *   루트에 같은 상한을 한 번 더 걸어도 렌더 결과가 달라지지 않고(배경이 없어 루트 상자는
- *   보이지 않는다) 같은 값이 세 곳에 생긴다. 그래서 루트는 폭을 채우기만 한다.
+ *   두 자식이 각자 full-bleed 밴드라 폭을 스스로 정한다 — 상한도 하한도 걸지 않고
+ *   --spacing-gutter(px-gutter)와 --container-container(max-w-container)의 조합으로 1920 에서
+ *   인셋 240 을 만든다(근거는 HeaderGNB.tsx 의 "인셋을 패딩으로 쓰지 않는 이유"). 루트에 폭 값을 한 번 더 걸면 같은 값이 세 곳에 생기고,
+ *   배경이 없어 루트 상자는 보이지도 않는다. 그래서 루트는 폭을 채우기만 한다.
  *
  * 두 인스턴스의 override — get_design_context(19661:3947) 로 확인한 것
  *   1. Header/GNB(19661:4225) 는 variant='default' 다. 추정이 아니라 네 가지가 동시에

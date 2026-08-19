@@ -22,8 +22,9 @@ import type { HTMLAttributes, ReactNode } from 'react'
  *   제목↔목록 간격         spacing/16              --spacing-16                pt-16
  *   컬럼 간격 · 섹션 간격  spacing/24              --spacing-24                gap-24 · pt-24
  *   상하 padding           spacing/40              --spacing-40                py-40
- *   전체 폭                변수 없음, 실측 1920    --container-viewport        max-w-viewport
- *   좌우 인셋              변수 없음, 실측 240     --spacing-viewport-inset    px-viewport-inset
+ *   밴드 좌우 거터         layout/gutter 24        --spacing-gutter            px-gutter
+ *   콘텐츠 폭 상한         변수 없음, 실측 1440    --container-container       max-w-container
+ *   (좌우 인셋 240 은 위 둘의 조합에서 나온다 — 아래 "인셋을 패딩으로 쓰지 않는 이유")
  *
  *   새로 만든 토큰 없음.
  *
@@ -36,7 +37,7 @@ import type { HTMLAttributes, ReactNode } from 'react'
  *   Figma 는 폭 1488 짜리 List 에 좌우 padding 24 와 컬럼 간격 24 를 주고, 그 List 를 1920
  *   안에서 가운데 정렬해 x=216 에 둔다. 결과적으로 첫 컬럼이 240 에서 시작하고 마지막 컬럼이
  *   1680 에서 끝난다 — 즉 콘텐츠가 차지하는 범위는 정확히 layout/viewport-inset 안쪽이다.
- *   그래서 px-viewport-inset + gap-24 + 컬럼 flex-1 로 옮겼다. 안쪽 폭 1440 에서 간격 5개를
+ *   그래서 px-gutter + max-w-container + gap-24 + 컬럼 flex-1 로 옮겼다. 안쪽 폭 1440 에서 간격 5개를
  *   빼고 6등분하면 220 이 그대로 나온다. 1488 · 216 · 220 에 토큰을 만들 필요가 없다.
  *
  * Figma 렌더와 다른 점 — 승인된 편차다. 버그로 보고 되돌리지 말 것.
@@ -75,6 +76,22 @@ import type { HTMLAttributes, ReactNode } from 'react'
  *   - 포커스 표시는 Tab · HeaderNotification 과 같은 조합이다. Figma 에 focus variant 가
  *     없으므로 새 시각 표현을 발명하지 않고 이미 있는 토큰 2개만 조합했다.
  *   - 내부 state 가 없다. Figma 에 없는 variant · 옵션(접기 · 반응형 컬럼 수)은 만들지 않았다.
+ *
+ * 인셋을 패딩으로 쓰지 않는 이유 (모든 full-bleed 밴드가 공유하는 구조)
+ *   이 밴드는 뷰포트 전체 폭을 쓴다. 좌우 인셋 240 을 루트 padding 으로 직접 주면
+ *   (px-viewport-inset) 그 240 이 어떤 폭에서도 고정이라, 뷰포트가 1920 보다 좁아지는 순간
+ *   콘텐츠가 남은 폭에서 눌리거나 밖으로 넘쳐 가로 스크롤이 생긴다. 밴드에 하한
+ *   (min-w-viewport)을 걸어 막아 보기도 했는데, 그것은 넘침을 없애는 대신 좁은 화면에서
+ *   항상 넘치게 만드는 쪽이었다. 그래서 인셋을 값으로 주지 않고 컨테이너가 만들게 둔다.
+ *     바깥 층   w-full + 배경 + px-gutter        (최소 폭 · 최대 폭 지정 없음)
+ *     안쪽 층   mx-auto w-full max-w-container
+ *   1920 에서 (1920 - 48 - 1440) / 2 + 24 = 240 이 그대로 나온다. 1920 보다 좁으면 상한 1440
+ *   쪽이 먼저 줄어들어 레이아웃이 자연스럽게 좁아지고(가로 스크롤 0), 1920 보다 넓으면 배경은
+ *   화면 전체로 늘고 콘텐츠는 1440 중앙에 남는다. 같은 구조가 full-bleed 밴드 6개
+ *   (HeaderGNB · HeaderNotification · Footer · FuntionalTab · ComponentTitle · HeroBanner)와
+ *   페이지 섹션에 같은 모양으로 들어가 있다.
+ *   --spacing-viewport-inset 토큰은 그대로 있다 — Figma layout/viewport-inset 변수의 대응이고
+ *   토큰 갤러리가 시연한다. 이 파일이 그것을 padding 으로 쓰지 않을 뿐이다.
  */
 
 export interface FooterLink {
@@ -112,12 +129,12 @@ const FOCUS_CLASSES =
 export function Footer({ columns, className = '', ...props }: FooterProps) {
   return (
     <footer
-      className={`w-full max-w-viewport border-t-hairline border-border-strong bg-bg-warm py-40 ${className}`}
+      className={`w-full border-t-hairline border-border-strong bg-bg-warm px-gutter py-40 ${className}`}
       {...props}
     >
       {/* 19649:33301 Navigation + 19649:33302 Container:margin + 19649:33303 List —
           세 프레임이 하는 일은 인셋과 컬럼 간격뿐이라 한 겹으로 합쳤다(위 참고). */}
-      <nav aria-label="Footer" className="flex w-full gap-24 px-viewport-inset">
+      <nav aria-label="Footer" className="mx-auto flex w-full max-w-container gap-24">
         {columns.map((sections, columnIndex) => (
           /* 컬럼도 섹션도 제목이 ReactNode 라 문자열 key 를 만들 수 없다. 순서가 곧
              정체성인 정적 목록이므로 인덱스를 쓴다(CategoryMenu · FuntionalTab 선례). */

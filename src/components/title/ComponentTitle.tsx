@@ -47,10 +47,10 @@ import { ButtonText } from '../ButtonText'
  *   설명 색                  text/secondary          --color-text-secondary    text-text-secondary
  *   제목↔설명 간격           변수 없음, 실측 8       --spacing-8               gap-8
  *   상하 padding             spacing/24              --spacing-24              py-24
- *   좌우 인셋                layout/viewport-inset   --spacing-viewport-inset  px-viewport-inset
  *   아래 구분선 색           border/default          --color-border-default    border-border-default
  *   구분선 두께              변수 없음, 실측 1       --border-width-hairline   border-b-hairline
- *   루트 폭                  layout/viewport 1920    --container-viewport      max-w-viewport
+ *   (Case=tab 은 폭도 좌우 여백도 갖지 않는다 — 아래 "좌우 여백을 컴포넌트가 갖지
+ *    않는 이유")
  *
  *   신규 토큰 없음 — 위 대응은 전부 이미 있던 토큰이다. Case=Button 의 action/primary ·
  *   action/secondary · border/strong · text/inverse · radius/8 · spacing/4 · spacing/16 ·
@@ -121,7 +121,7 @@ import { ButtonText } from '../ButtonText'
  *     때문에(link · Button = layout/container, tab = layout/viewport) 임의값이 아니라
  *     토큰으로 옮길 수 있었다. BodyText 가 폭을 호출부에 넘긴 것은 그 인스턴스 폭에
  *     대응하는 변수가 없었기 때문이고, 여기는 사정이 다르다.
- *   - Case=tab 만 좌우 인셋(px-viewport-inset)을 스스로 갖는다. 이 Case 의 프레임은
+ *   - Case=tab 만 좌우 인셋을 스스로 갖는다(거터 + 컨테이너 조합). 이 Case 의 프레임은
  *     뷰포트 폭 밴드이고 안쪽 TabContent 가 정확히 container 폭이다(viewport - 인셋 2개).
  *     link · Button 은 패딩이 없는 container 폭 콘텐츠 블록이라 인셋이 없다.
  *   - 텍스트에 whitespace-nowrap 을 옮기지 않았다. Figma 의 nowrap 은 텍스트 컨테이너가
@@ -200,6 +200,21 @@ import { ButtonText } from '../ButtonText'
  *   고정 width override 다. w-140 은 Button 의 className 이 클래스 문자열 마지막에
  *   합성되고 기본 클래스에 w-* 가 없어(min-w-80 만 있다) 덮어쓰기 없이 적용된다 —
  *   Button.tsx 를 직접 읽어 확인했다.
+ *
+ * 좌우 여백을 컴포넌트가 갖지 않는 이유 (Case=tab)
+ *   Case=tab 은 자기 배경이 없는 일반 섹션이다. 그래서 좌우 여백도 폭 상한도 갖지 않고,
+ *   호출부(페이지)가 다른 섹션과 같은 컨테이너 래퍼로 감싼다:
+ *     바깥  w-full px-gutter
+ *     안쪽  mx-auto w-full max-w-container
+ *   1920 에서 (1920 - 48 - 1440) / 2 + 24 = 240 이 나오고, 그 래퍼를 공유하는 다른 섹션
+ *   (PDPComponent · Footer 컬럼 · HeroBanner 카피)과 좌측 라인이 픽셀 단위로 같아진다.
+ *   이전에는 이 Case 가 루트에 px-gutter 를 직접 갖고 안쪽 컨테이너가 없었다. 그래서 글자가
+ *   거터 바로 안쪽(24)에서 시작해 아래 섹션들(1920 에서 240)과 어긋났다 — 실측으로 확인한
+ *   불일치이고 이 변경이 그것을 없앤다.
+ *   대가: 아래 구분선이 화면 전체가 아니라 컨테이너 폭 1440 이 된다. Figma 원본은 프레임 폭
+ *   1920 에 선을 긋지만, "컴포넌트에 폭·여백을 넣지 않고 페이지 래퍼가 준다" 가 요청자
+ *   확정 사항이다. 선을 다시 화면 전체로 만들려면 컴포넌트가 밴드 층을 되돌려 가져야 한다.
+ *   --spacing-viewport-inset 토큰은 그대로 있다 — 이 파일이 padding 으로 쓰지 않을 뿐이다.
  */
 
 /* Figma 축 Case. 값은 소문자로 통일했다 — 위 "확정된 구현 판단" 1번 참고. */
@@ -249,13 +264,14 @@ export function ComponentTitle({
      'h1'|...|'h6' 로 좁혀지므로 임의 태그가 들어올 수 없다. BodyText 와 같은 방식이다. */
   const Heading = `h${headingLevel}` as const
 
-  /* Case=tab (19661:21036) — 뷰포트 폭 밴드 + 아래 구분선. 오른쪽 액션이 없다.
+  /* Case=tab (19661:21036) — 제목 + 설명 + 아래 구분선. 오른쪽 액션이 없다.
      Figma 루트의 gap 과 TabContent 의 gap 은 자식이 하나뿐이라 렌더에 영향이 없어
-     옮기지 않았다. */
+     옮기지 않았다.
+     좌우 여백도 폭도 갖지 않는다 — 아래 "좌우 여백을 컴포넌트가 갖지 않는 이유" 참고. */
   if (componentCase === 'tab') {
     return (
       <div
-        className={`flex w-full max-w-viewport flex-col items-start border-b-hairline border-border-default px-viewport-inset py-24 ${className}`}
+        className={`flex w-full flex-col items-start border-b-hairline border-border-default py-24 ${className}`}
         {...props}
       >
         {/* 19661:21038 Title */}
