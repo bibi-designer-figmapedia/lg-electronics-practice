@@ -31,6 +31,22 @@
   --container-container: 90rem; /* layout/container 1440 — 콘텐츠 컨테이너 최대 너비 */
   --container-filter-width: 15rem; /* layout/filter-width 240 — 필터 패널 너비 */
 
+  /* Not a `layout/*` variable in Figma: the banner copy column is authored at a
+     fixed 542 on MainContentTitle (node-id=19832-1348) and again on the
+     HeroBanner container frame that holds it (node-id=19832-1363).
+     get_variable_defs on both returns no size step for it while
+     get_design_context writes every neighbouring Button metric as a
+     `var(--spacing/...)` reference, so 542 is a measured frame value.
+     It is a cause, not a consequence: all three text layers and the Copy frame
+     inherit exactly 542 from the root, and the CTA hugs at 100 regardless.
+     Registered here rather than in ./spacing.tokens.css because it is a width,
+     and this file's two namespaces are split by what a token *is*: widths get
+     `--container-*` so they become `w-*` / `max-w-*` and cannot be mistaken for
+     a padding. The measured widths that live in the spacing namespace (450, 660,
+     860) predate this rule and are recorded there; new widths belong here.
+     Role-named, which is this file's default rule — no exception needed. */
+  --container-banner-copy: 33.875rem; /* 542 — 배너 카피 열 너비 */
+
   /* ---- insets and gaps (Figma layout/*) ----
      `gutter` is the one that duplicates an existing step: Figma defines
      layout/gutter as 24, the same as spacing/24. It references the step rather
