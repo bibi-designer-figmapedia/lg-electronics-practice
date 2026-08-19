@@ -24,7 +24,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
  * 값 자체는 여기 적지 않는다(레이어 3 hook 대상). 값은 src/tokens/ 를 볼 것.
  *
  *   용도                            Figma 변수 / 실측      코드 토큰                      유틸리티
- *   좌우 padding                    spacing/16             --spacing-16                   px-16
+ *   좌우 padding                    spacing/20             --spacing-20                   px-20
  *   sm·md 상하 padding              spacing/12             --spacing-12                   py-12
  *   lg 상하 padding                 spacing/20             --spacing-20                   py-20
  *   라벨↔아이콘 간격                spacing/4              --spacing-4                    gap-4
@@ -114,6 +114,23 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
  *   19649-31459 · 19649-31462 · 19676-24905 · 19676-24908 · 19649-31390 의 실제 값을,
  *   get_variable_defs(19649:31393) 로 변수 정의를 확인했다. 위 토큰 매핑표와 일치했고
  *   고칠 항목은 없었다.
+ *
+ * 번복 이력 2 — 좌우 padding 이 16 에서 20 으로 바뀌었다
+ *   Figma 의 Button/Web 세트가 이전 구현 이후 갱신됐다. get_design_context(19676:24902)
+ *   가 지금 좌우 padding 을 var(--spacing/20) 으로 낸다. 이 저장소는 spacing/16 으로
+ *   구현돼 있었다. MainContentTitle 재구현(19832:1348) 중에 그 인스턴스가 20 을 내는 것을
+ *   발견해 미해결로 적어 뒀던 항목이고, 요청자가 3사이즈의 값을 확정해 여기서 반영했다.
+ *
+ *     size=sm   좌우 20 / 상하 12   h 44   gap 4   radius 8
+ *     size=md   좌우 20 / 상하 12   h 48   gap 4   radius 8
+ *     size=lg   좌우 20 / 상하 20   h 64   gap 4   radius 8
+ *
+ *   state · type 은 padding 에 영향이 없다 — 18개 variant 가 위 3종으로 완전히 수렴한다는
+ *   것을 요청자가 확인했다. 그래서 바뀐 것은 공통 클래스의 px 하나뿐이고 sizeClasses 는
+ *   손대지 않았다(위 표의 높이 · 상하 padding 이 이미 그 값이다).
+ *
+ *   부수 효과: 모든 버튼이 좌우로 8 씩 넓어진다. 최소 너비 80 제약에 걸려 있던 짧은
+ *   라벨은 이제 콘텐츠 폭으로 그 값을 넘길 수 있어 min-w-80 의 발현 범위가 줄어든다.
  */
 
 export type ButtonVariant = 'primary' | 'secondary'
@@ -228,7 +245,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`type-body-default-strong inline-flex min-w-80 items-center justify-center gap-4 rounded-8 border-hairline px-16 disabled:pointer-events-none ${sizeClasses[size]} ${stateClasses[variant][state]} ${disabledClasses[variant]} ${className}`}
+      className={`type-body-default-strong inline-flex min-w-80 items-center justify-center gap-4 rounded-8 border-hairline px-20 disabled:pointer-events-none ${sizeClasses[size]} ${stateClasses[variant][state]} ${disabledClasses[variant]} ${className}`}
       {...props}
     >
       {children}
