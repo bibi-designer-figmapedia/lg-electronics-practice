@@ -318,7 +318,10 @@ const FOOTER_COLUMNS: FooterColumn[] = [
 export function PDP() {
   return (
     /* 183:10007 Page/PDP */
-    <div className="flex w-full flex-col items-start bg-bg-warm">
+    /* min-w-container(1440)가 바닥인 이유: 시안 컨테이너 폭이 1440 이고 그보다 좁은
+       레이아웃을 Figma 가 정의하지 않았다 — 축소를 여기서 멈추고 부족한 폭은 가로 스크롤로
+       넘긴다. */
+    <div className="flex w-full min-w-container flex-col items-start bg-bg-warm">
       {/* 183:10008 Navigation — override 없음. 핸들러는 페이지가 정하지 않는다. */}
       <Navigation notification={NOTIFICATION_MESSAGE} items={CATEGORY_ITEMS} />
 
