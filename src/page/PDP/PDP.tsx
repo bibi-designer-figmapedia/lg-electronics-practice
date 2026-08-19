@@ -107,8 +107,10 @@ const HERO = {
   src: sampleBannerImage,
   alt: 'LG 인스타뷰 냉장고가 놓인 주방',
   eyebrow: 'Eyebrow',
-  title: 'Title',
-  description: 'Description',
+  headline: 'Title',
+  /* prop 이름만 description -> subcopy 로 바뀌었다. 이 페이지의 Figma 원본이 그린 문구는
+     그대로다 — 이름 변경이 화면 내용을 바꾸지 않게 값은 손대지 않았다. */
+  subcopy: 'Description',
 }
 
 /* 출처: FuntionalTab.stories.tsx 의 DESCRIPTION. 7칸이 전부 같은 문구다. */
@@ -288,8 +290,8 @@ export function PDP() {
           src={HERO.src}
           alt={HERO.alt}
           eyebrow={HERO.eyebrow}
-          title={HERO.title}
-          description={HERO.description}
+          headline={HERO.headline}
+          subcopy={HERO.subcopy}
           headingLevel={1}
         />
 
