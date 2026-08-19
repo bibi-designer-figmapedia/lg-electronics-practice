@@ -30,7 +30,7 @@ import type { IconPLPName } from './icons/IconPLP'
  *
  *   새로 만든 토큰 없음. 루트 밴드의 조합(border-b-hairline ·
  *   border-border-default · px-gutter · py-24)은 ComponentTitle 의 Case=tab 이
- *   이미 쓰고 있는 것과 같다.
+ *   쓰던 것과 같다(그쪽은 이후 여백을 페이지 래퍼에 넘겨 px-gutter 를 뺐다).
  *
  * 좌우 인셋을 이 컴포넌트가 갖는 이유 (확정된 인셋 모델의 full-bleed 갈래)
  *   인셋 모델에는 갈래가 둘 있다. 일반 섹션은 페이지 래퍼가 px-viewport-inset 을 주고
@@ -56,22 +56,27 @@ import type { IconPLPName } from './icons/IconPLP'
  *   커지는 것이다(글자 블록은 자기 상한 180 을 지키므로 실제 글자 폭은 그대로고, 남는 5 는
  *   칸 안쪽 여유가 된다). 이 편차는 승인된 것이며 버그로 보고 되돌리지 말 것.
  *
- * 화살표가 인셋 밖(거터)에 놓이는 것은 원본 그대로다 (좌표로 확인)
- *   get_metadata(19661:18858) 실측은 좌화살표 200–248 · 목록 240–1680 · 우화살표 1720–1768
- *   이다. 즉 화살표는 목록의 1440 밴드 밖, 좌우 240 거터 안에 있다.
- *   1920 에서 콘텐츠 합은 48 + 40 + 1440 + 40 + 48 = 1616 이고 인셋 안쪽 폭 1440 보다 넓어서
- *   justify-center 가 좌우로 대칭으로 넘치게 만든다 — 목록 240–1680 · 우화살표 1720–1768 로
- *   원본과 같고, 넘친 화살표는 240 인셋(거터) 안에 들어간다. 좌화살표만 152–200 으로 원본의
- *   200–248 보다 48 왼쪽이다. 원본 자체가 비대칭이라(좌화살표 오른쪽 끝 248 이 목록 시작
- *   240 을 8 침범한다) 우화살표 쪽 간격 40 을 좌우 대칭으로 맞추는 쪽을 택했다. 이 48 은
- *   남겨둔 차이이고 근사하지 않았다.
- *   목록에 shrink-0 을 걸지 않는 이유도 여기서 나온다. 인셋을 루트 padding 240 으로 주던
- *   때에는 안쪽 폭이 1440 이라 화살표 몫 176 만큼 목록이 눌려서(1264) shrink-0 이 필요했다.
- *   지금은 루트가 거터 24 만 가지므로 1920 에서 안쪽 폭이 1872 이고, 목록 1440 + 화살표 몫
- *   176 = 1616 이 그 안에 들어간다 — 눌릴 일이 없어 shrink-0 이 필요하지 않다. 오히려 걸면
- *   1512 처럼 안쪽 폭이 1616 보다 좁은 화면에서 목록이 1440 을 고집해 화살표가 화면 밖으로
- *   넘치고 가로 스크롤이 생긴다(실측: 1512 에서 문서 폭 1564). 빼면 목록이 남는 폭까지만
- *   차지하고 칸이 flex-1 이라 균등하게 줄어든다 — 어느 폭에서도 넘침이 없다.
+ * 화살표를 섹션 좌측 라인에 맞춘다 (요청자 확정 — Figma 좌표와 다른 지점)
+ *   Figma 실측(get_metadata 19661:18858)은 좌화살표 200–248 · 목록 240–1680 ·
+ *   우화살표 1720–1768 이다. 즉 원본은 화살표를 목록 1440 **밖**(좌우 240 거터 안)에 둔다.
+ *   그 배치를 그대로 옮기면 화살표가 페이지의 좌측 라인보다 왼쪽에 서게 된다 — 1920 에서
+ *   좌화살표 152, 아래 섹션 제목("LG OLED") 240 으로 88 어긋났다(실측). 요청자가 화살표의
+ *   왼쪽 끝을 다른 섹션의 좌측 라인에 맞추기로 확정했고, 목록이 그보다 안쪽에서 시작하는
+ *   것은 정상으로 규정했다.
+ *   그래서 화살표까지 컨테이너 층 안에 넣는다 — 밴드 루트가 px-gutter 를 갖고, 안쪽
+ *   mx-auto max-w-container 층이 [좌화살표 · 목록 · 우화살표]를 담는다. 결과(실측):
+ *     1920  화살표 240–288 · 목록 328–1592 · 우화살표 1632–1680
+ *     1512  화살표  36–84  · 목록 124–1388 · 우화살표 1428–1476
+ *     2600  화살표 580–628 · 목록 668–1932 · 우화살표 1972–2020
+ *   화살표 왼쪽 끝이 240 / 36 / 580 으로 다른 섹션의 좌측 라인과 픽셀 단위로 같아진다.
+ *   대가는 목록 폭이다. 컨테이너 1440 에서 화살표 몫 176 을 빼 1264 가 되고, 칸 폭이 1920
+ *   기준 185 에서 160 으로 줄어든다(칸 안 글자 블록의 상한 180 보다 작아져 설명문이 조금 더
+ *   접힌다). Figma 의 목록 240–1680 도 이 만큼 어긋난다 — 라인 정렬을 목록 폭보다 우선하기로
+ *   한 요청자 결정의 결과이며 버그가 아니다.
+ *   목록에 shrink-0 을 걸지 않는 이유도 여기서 나온다. 목록은 컨테이너에서 화살표 몫을 뺀
+ *   나머지를 차지해야 하고, 칸이 flex-1 이라 좁아진 폭을 균등하게 나눈다. shrink-0 을 걸면
+ *   목록이 1440 을 고집해 화살표가 화면 밖으로 나가고 가로 스크롤이 생긴다(실측: 1512 에서
+ *   문서 폭 1564).
  *
  * 화살표 아이콘 — Icon/UI 재사용과 그 대가 (요청자 확정)
  *   Figma 원본은 icon_page_arrow(48 프레임, Arrow_M 벡터, 획 두께 2.5, square cap)라는
@@ -175,36 +180,41 @@ export function FuntionalTab({
 }: FuntionalTabProps) {
   return (
     <div
-      className={`flex w-full items-center justify-center gap-40 border-b-hairline border-border-default bg-bg-warm px-gutter py-24 ${className}`}
+      className={`flex w-full items-center border-b-hairline border-border-default bg-bg-warm px-gutter py-24 ${className}`}
       {...props}
     >
-      {/* 19661:18808 icon_page_arrow — 원본은 오른쪽 화살표를 뒤집은 인스턴스다. */}
-      <PageArrowButton type="arrowLeft" label="Previous categories" onClick={onPrev} />
+      {/* 안쪽 콘텐츠 층 — 폭 상한 1440 을 잡고 가운데 선다. 화살표까지 이 안에 들어가므로
+          왼쪽 화살표의 왼쪽 끝이 곧 컨테이너의 왼쪽 라인이다(아래 "화살표를 섹션 좌측 라인에
+          맞춘다" 항목 참고). */}
+      <div className="mx-auto flex w-full max-w-container items-center gap-40">
+        {/* 19661:18808 icon_page_arrow — 원본은 오른쪽 화살표를 뒤집은 인스턴스다. */}
+        <PageArrowButton type="arrowLeft" label="Previous categories" onClick={onPrev} />
 
-      {/* 19661:18760 category icon set — 폭 상한 1440. 칸은 균등 분할이고 간격은 gap-24 다.
-          shrink-0 을 걸지 않는 이유는 아래 "화살표가 인셋 밖(거터)에 놓이는 것" 항목에 있다. */}
-      <ul className="flex w-full max-w-container items-start gap-24">
-        {items.map((item, index) => (
-          /* Figma 원본의 마지막 두 칸이 라벨까지 똑같아서 라벨만으로는 key 가 유일하지
-             않다. 순서가 곧 정체성인 정적 목록이므로 인덱스를 쓴다(CategoryMenu 선례).
+        {/* 19661:18760 category icon set — 칸은 균등 분할이고 간격은 gap-24 다. 폭 상한은
+            이 목록이 아니라 위 컨테이너 층이 갖는다. */}
+        <ul className="flex w-full items-start gap-24">
+          {items.map((item, index) => (
+            /* Figma 원본의 마지막 두 칸이 라벨까지 똑같아서 라벨만으로는 key 가 유일하지
+               않다. 순서가 곧 정체성인 정적 목록이므로 인덱스를 쓴다(CategoryMenu 선례).
 
-             칸은 flex-1 로 균등 분할하고 min-w-0 으로 내용 최소폭을 풀어 준다. 폭을 고정하면
-             줄이 좁아질 때 칸이 서로 맞닿는다(아래 "칸 폭과 간격" 참고). 안쪽 글자 블록이
-             자기 상한 180 을 넘지 않으므로 남는 여유는 justify-center 가 칸 안에서 나눈다. */
-          <li key={index} className="flex min-w-0 flex-1 justify-center">
-            <FuntionalTabItem
-              icon={item.icon}
-              label={item.label}
-              description={item.description}
-              href={item.href}
-              state={item.active ? 'active' : 'default'}
-            />
-          </li>
-        ))}
-      </ul>
+               칸은 flex-1 로 균등 분할하고 min-w-0 으로 내용 최소폭을 풀어 준다. 폭을 고정하면
+               줄이 좁아질 때 칸이 서로 맞닿는다(아래 "칸 폭과 간격" 참고). 안쪽 글자 블록이
+               자기 상한 180 을 넘지 않으므로 남는 여유는 justify-center 가 칸 안에서 나눈다. */
+            <li key={index} className="flex min-w-0 flex-1 justify-center">
+              <FuntionalTabItem
+                icon={item.icon}
+                label={item.label}
+                description={item.description}
+                href={item.href}
+                state={item.active ? 'active' : 'default'}
+              />
+            </li>
+          ))}
+        </ul>
 
-      {/* 19661:18809 icon_page_arrow */}
-      <PageArrowButton type="arrowRight" label="Next categories" onClick={onNext} />
+        {/* 19661:18809 icon_page_arrow */}
+        <PageArrowButton type="arrowRight" label="Next categories" onClick={onNext} />
+      </div>
     </div>
   )
 }
