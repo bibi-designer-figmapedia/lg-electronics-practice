@@ -153,7 +153,7 @@ function InfoValue({
  */
 export function ScreenSpecDoc({ spec, screen }: ScreenSpecDocProps) {
   return (
-    <article className="bg-bg-default font-text">
+    <article className="spec-screen-doc bg-bg-default font-text min-w-viewport">
       {/* 상단 5칸 — Figma "location" 프레임 (118:7175) */}
       <dl className="border-b-hairline border-border-focus grid grid-cols-6">
         <InfoLabel>화면</InfoLabel>
@@ -172,23 +172,34 @@ export function ScreenSpecDoc({ spec, screen }: ScreenSpecDocProps) {
       </dl>
 
       {/*
-        Figma 시트는 화면(왼쪽 1920)과 Description(오른쪽 600)을 가로로 나란히
-        둔다. 그 폭들은 2880 아트보드 전용이라 옮기지 않고 2:1 비율로 뒀다.
-        좁은 화면에서는 세로로 쌓는다 — 시트의 가로 배치는 아트보드가 넓어서
-        가능한 것이고, 문서 페이지 폭에서 그대로 하면 양쪽 다 읽히지 않는다.
+        Figma 시트는 화면(왼쪽 1920)과 Description(오른쪽 600)을 가로로 나란히 둔다.
+        코드도 항상 한 줄(flex + gap-32)이다 — 폭에 따라 세로로 쌓지 않고, 좌표를
+        absolute 로 맞추지도 않는다. 두 칸이 겹치지 않는 것을 폭과 무관하게 보장하는
+        것이 이 배치의 목적이다.
+
+        칸 폭: 왼쪽은 화면 자신의 최소 폭 1440 으로 고정(shrink-0)하고 오른쪽 표가
+        남는 폭을 갖는다. 시트의 1920 대 600 비율을 그대로 옮기지 않은 이유는 왼쪽에
+        들어가는 것이 그림이 아니라 실제 페이지 구현체여서, 그 페이지가 자기 최소 폭
+        1440 을 갖기 때문이다(각 페이지 루트의 min-w-container).
+
+        그래서 문서 프레임 자체에 최소 폭 1920(min-w-viewport)을 준다 —
+        화면 1440 + gap 32 + 표 448 이다. 문서 컨테이너가 그보다 좁으면 줄이지 않고
+        가로 스크롤로 넘긴다(페이지가 1440 을 바닥으로 삼는 것과 같은 방식).
       */}
-      <div className="mt-32 flex flex-col items-start gap-32 lg:flex-row">
+      <div className="mt-32 flex items-start gap-32">
         {screen && (
-          /* 화면 슬롯. 페이지 컴포넌트는 자기 폭을 채우므로 여기서 크기를 정하지
-             않는다 — 열 폭이 곧 화면 폭이다. */
-          <div className="w-full min-w-0 lg:basis-2/3">{screen}</div>
+          /* 화면 슬롯. 페이지 자신의 최소 폭이 1440(min-w-container)이라 열도 1440 으로
+             고정하고 줄지 않게 둔다 — 열이 그보다 좁으면 페이지가 열 밖으로 넘쳐
+             Description 을 덮는다(그것이 이 문서가 깨져 있던 원인이다). */
+          <div className="w-container shrink-0">{screen}</div>
         )}
 
-        {/* Description 표 — Figma "Description" 프레임 (118:7135) */}
+        {/* Description 표 — Figma "Description" 프레임 (118:7135)
+            불투명 배경(bg-bg-default)을 갖는다 — 뒤 내용이 비치지 않게 하는 안전판이다. */}
         <section
           className={cx(
-            'flex w-full min-w-0 flex-col gap-12',
-            screen && 'lg:basis-1/3',
+            'flex min-w-0 flex-col gap-12 bg-bg-default',
+            screen ? 'flex-1' : 'w-full',
           )}
         >
           <h2 className="type-subtitle-medium-strong text-text-primary">

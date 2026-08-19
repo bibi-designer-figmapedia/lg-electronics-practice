@@ -25,6 +25,29 @@ import * as SignInStories from './SignIn.stories'
 원본과 대조하려면 좌측 사이드바의 **Spec** 스토리로 이동해 **Design** 탭을 연다.
 화면만 따로 보려면 **Pages / SignIn** 으로 간다.
 
+{/*
+  Docs 컨테이너 폭 제한 해제 — 이 문서에만 적용한다.
+
+  Storybook 의 .sbdocs-content 는 max-width 1000 이다(측정값). 화면정의서는 그 안에
+  1440 짜리 화면 구현체와 Description 표를 나란히 놓아야 해서 1000 안에서는 성립하지
+  않는다 — 실제로 화면이 열 밖으로 넘쳐 표를 덮고 있었다.
+
+  아래 규칙은 :has() 로 "ScreenSpecDoc 을 품은 docs 컨테이너" 만 고른다. 다른 스토리 ·
+  문서에는 매칭되지 않고, 이 style 블록 자체도 이 MDX 가 렌더될 때만 문서에 들어간다.
+  preview.ts 등 전역에는 아무것도 추가하지 않는다.
+  넘치는 폭은 감추지 않고 가로 스크롤로 넘긴다 — 문서 프레임의 최소 폭 1920 은
+  ScreenSpecDoc 이 갖는다.
+*/}
+
+<style>{`
+  .sbdocs-content:has(.spec-screen-doc) {
+    max-width: none;
+  }
+  .sbdocs-content:has(.spec-screen-doc) .sbdocs-preview {
+    overflow-x: auto;
+  }
+`}</style>
+
 <Story of={SignInStories.Spec} />
 
 ## 이 문서가 만들어진 방식
