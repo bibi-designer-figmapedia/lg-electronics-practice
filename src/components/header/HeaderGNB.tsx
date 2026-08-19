@@ -45,17 +45,23 @@ import { RightMenu, type RightMenuProps } from './RightMenu'
  *   default 로고 높이          변수 없음, 실측 44      --spacing-44                h-44 (중요도 표시)
  *   secondary 로고 높이        변수 없음, 실측 38      --spacing-38                h-38 (중요도 표시)
  *   secondary Link 높이        변수 없음, 실측 76      --spacing-76                h-76
- *   default 로고 좌측 위치     변수 없음, 실측 92      --spacing-92                left-92
+ *   default 바 좌우 인셋       변수 없음, 실측 92      --spacing-gnb-inset         px-gnb-inset
+ *   로고↔GNBContent 간격       변수 없음, 실측 48      --spacing-48                gap-48
  *   secondary Link 좌우 인셋   변수 없음, 실측 82      --spacing-82                px-82
  *
  *   spacing/40 과 spacing/8 은 이 파일에 쓸 자리가 없다 — 40 은 CategoryMenu 의 탭 간격,
  *   8 은 RightMenu 의 iconArea padding 이고 둘 다 해당 컴포넌트가 이미 갖고 있다.
  *   text/disclaimer 는 hidden 인 Brand 레이어가 쓰던 변수라 렌더 대상이 아니다.
- *   이 작업에서 새로 등재된 토큰은 --spacing-76 · --spacing-92 · --spacing-82 셋이고, 등재는
+ *   header 작업에서 등재된 토큰은 --spacing-76 · --spacing-82 둘이고(92 는 아래 참고), 등재는
  *   전부 token-guardian 이 했다(아래 "Link 의 고정 높이 76" 및 "92 와 82" 참고). 나머지는
  *   전부 기존 토큰을 그대로 쓴다.
  *
  * 92 와 82 가 각각 단일 스텝이 된 경위 (두 스텝의 합에서 옮겨온 것이다)
+ *   아래는 로고를 absolute 로 얹던 때의 기록이다. 92 라는 값 자체는 그대로 쓰이지만, 지금
+ *   이 파일이 참조하는 토큰은 --spacing-gnb-inset 이다(위 "로고를 absolute 가 아니라 흐름
+ *   안에 두는 이유" 참고). 숫자 스텝 --spacing-92 는 이 변경으로 참조하는 곳이 없어져
+ *   제거됐고, 같은 값이 인셋 이름으로 src/tokens/layout.tokens.css 로 옮겨갔다. 아래 문단이
+ *   말하는 위험(합으로 쓰기 · 이름 없이 쓰기)은 그 토큰이 그대로 막는다.
  *   두 값 모두 Figma 가 변수를 걸지 않은 실측값이다 — get_variable_defs 를 default variant ·
  *   secondary variant · Link 프레임 셋에 각각 걸어 확인했고, 돌아오는 크기 변수는
  *   spacing/40 · spacing/8 · spacing/24 뿐이라 92 도 82 도 거기에 없다.
@@ -64,7 +70,7 @@ import { RightMenu, type RightMenuProps } from './RightMenu'
  *   Button/Text 안 Icon/UI 의 리사이즈 값으로 등재된 토큰이다. 즉 헤더 로고 위치가 버튼
  *   최소너비에, 헤더 좌우 인셋이 버튼 아이콘 크기에 묶여 있었다. 둘 중 하나가 자기 사유로
  *   움직이는 날 헤더가 조용히 따라 움직이는데, 합은 여전히 유효한 CSS 라 레이어 3 hook 도
- *   verify:tokens 도 잡지 못한다. 그래서 --spacing-92 · --spacing-82 를 등재해 끊었다.
+ *   verify:tokens 도 잡지 못한다. 그래서 두 값을 각자 단일 토큰으로 등재해 끊었다.
  *   대괄호 임의값이 막히는 것과는 별개로, 이름 없는 숫자는 Tailwind 내장 스케일에서 0.25 배
  *   rem 으로 조용히 해석되므로 스텝 등재가 그 구멍도 함께 닫는다. 값은 그대로라 렌더 위치는
  *   92 · 82 로 변함이 없다.
@@ -74,7 +80,22 @@ import { RightMenu, type RightMenuProps } from './RightMenu'
  *   그 안에 GNBContent(폭 1440)가 가로 가운데 정렬로 놓이고, 좌우 끝에 CategoryMenu 와
  *   RightMenu 가 붙는다(justify-between: CategoryMenu x 0 폭 864, RightMenu x 1013 폭 427,
  *   1013 + 427 = 1440 으로 오른쪽 끝에 정확히 닿는다). Logo/LG 는 GNBContent 바깥의 왼쪽
- *   여백(0 부터 240 사이)에 절대 배치돼 있어 흐름에서 빼고 absolute 로 옮겼다.
+ *   여백에 x 92 로 놓인다.
+ *
+ * 로고를 absolute 가 아니라 흐름 안에 두는 이유 (확정된 레이아웃 모델)
+ *   Figma 의 92 와 240 은 폭 1920 고정 프레임 안의 절대 좌표 2개이고, 그래서 로고 오른쪽
+ *   끝 192 와 GNBContent 시작 240 사이의 48 이 항상 성립한다. 이전 구현은 이 중 240 만
+ *   중앙 정렬 결과로 바꿔 옮겼다 — 로고는 뷰포트 왼쪽에서 92(absolute left-92), 메뉴는
+ *   (폭 - 1440) / 2 였다. 두 좌표계는 폭이 정확히 1920 일 때만 일치하고, (폭 - 1440) / 2 가
+ *   192 보다 작아지는 폭(1824 미만)에서는 로고가 메뉴 행 안으로 들어가 라벨을 덮었다.
+ *   그래서 절대 좌표를 쓰지 않는다. 로고는 흐름의 첫 아이템이고, 루트가 자기 인셋 92 를
+ *   padding 으로 들고(px-gnb-inset), 로고와 GNBContent 사이를 gap 48 로 벌린다. 이러면
+ *   92 · 48 · 240 이 한 좌표계에서 나오므로 어떤 폭에서도 겹치지 않는다.
+ *   GNB 가 쓰는 인셋은 콘텐츠 컨테이너의 240 이 아니라 자체 값 92 다 — 그 근거로
+ *   --spacing-gnb-inset 을 새로 등재했다(src/tokens/layout.tokens.css 의 주석 참고).
+ *   폭이 1920 보다 좁아지면 GNBContent 가 1440 을 못 채우고 줄어든다. 왼쪽 인셋(92 + 100 +
+ *   48 = 240)은 유지되고 오른쪽 인셋만 240 에서 92 로 줄어든다 — 로고가 왼쪽 거터에 사는
+ *   Figma 모델에서는 이 비대칭이 원본의 구조 그대로다.
  *
  *   높이 80 을 padding 파생이 아니라 h-80 으로 둔 이유: Figma 가 80 을 프레임 고정값으로
  *   authoring 하고 자식(GNBContent · Logo)을 둘 다 절대 좌표로 얹는다. 즉 80 은 내용에서
@@ -191,6 +212,8 @@ import { RightMenu, type RightMenuProps } from './RightMenu'
  * 아직 남은 차이 (근사하지 않고 남겨둔 것)
  *   default 의 GNBContent 세로 위치가 1.5 어긋난다(위 구조 설명 참고). 92 · 82 는 단일 스텝
  *   등재로 닫혔다 — 값도 그대로이고 의미 결합도 사라졌다.
+ *   폭 1920 에서는 로고 92–192 · GNBContent 240–1680 으로 Figma 실측과 같다. 1920 보다
+ *   좁아지면 오른쪽 인셋만 92 로 줄어든다 — 위 레이아웃 모델 항목에 근거를 적었다.
  */
 
 export type HeaderGNBVariant = 'default' | 'secondary'
@@ -219,11 +242,14 @@ export interface HeaderGNBProps extends HTMLAttributes<HTMLElement> {
 
 /*
  * variant 별 루트 클래스. 공통(폭 · 배경)은 아래 합성부에 두고 다른 것만 여기 담는다.
- *   default   — 높이 80 고정 · 아래쪽 구분선 · 로고를 absolute 로 얹기 위한 relative.
+ *   default   — 높이 80 고정 · 아래쪽 구분선 · px-gnb-inset 이 바의 좌우 인셋(92)이고
+ *               gap-48 이 로고와 GNBContent 사이 간격이다. absolute 를 쓰지 않으므로
+ *               relative 도 필요하지 않다.
  *   secondary — 구분선 없음. 세로 쌓기 + px-82 가 Link 의 좌우 인셋이다.
  */
 const rootVariantClasses: Record<HeaderGNBVariant, string> = {
-  default: 'relative flex h-80 items-center border-b-hairline border-border-strong',
+  default:
+    'flex h-80 items-center gap-48 border-b-hairline border-border-strong px-gnb-inset',
   secondary: 'flex flex-col px-82',
 }
 
@@ -242,8 +268,19 @@ export function HeaderGNB({
     >
       {variant === 'default' ? (
         <>
-          {/* 19643:30488 GNBContent — 폭 1440 을 가운데 두고 좌우 끝에 두 묶음을 붙인다. */}
-          <div className="mx-auto flex w-full max-w-container items-center justify-between">
+          {/*
+           * 19655:33588 Logo/LG — 흐름 안의 첫 아이템이다. 루트의 px-gnb-inset(92)이 왼쪽
+           * 위치를 정하고, 세로는 루트의 items-center 가 가운데에 둔다(Figma 도 가운데에서
+           * 0.5 차이다). 높이 44 는 40 짜리 GNBContent 보다 크지만 루트 높이가 h-80 고정이라
+           * 바 높이를 밀지 않는다.
+           */}
+          <LogoLG variant="color" className="h-44! shrink-0" />
+          {/*
+           * 19643:30488 GNBContent — 폭 상한 1440. 남는 폭을 채우다가 1440 에서 멈춘다.
+           * 1920 에서 92 + 로고 100 + gap 48 = 240 이 되어 Figma 의 GNBContent x 240 과
+           * 같아지고, 상한 1440 이 오른쪽 끝을 1680 에 세운다 — 오른쪽 거터도 240 이다.
+           */}
+          <div className="flex max-w-container flex-1 items-center justify-between">
             {/* 19655:33694 — layout=LeftMenu (위 대조 근거 참고) */}
             <CategoryMenu layout="leftMenu" items={items} />
             {/*
@@ -252,15 +289,6 @@ export function HeaderGNB({
              */}
             <RightMenu {...rightMenu} />
           </div>
-          {/*
-           * 19655:33588 Logo/LG — GNBContent 바깥 왼쪽 여백에 놓이므로 흐름에서 뺀다.
-           * 흐름에 두면 높이 44 가 40 짜리 행을 밀어 바 높이가 어긋난다.
-           * 왼쪽 92 는 left-92, 세로는 바 가운데(Figma 도 가운데에서 0.5 차이다).
-           */}
-          <LogoLG
-            variant="color"
-            className="absolute top-1/2 left-92 h-44! -translate-y-1/2"
-          />
         </>
       ) : (
         /*

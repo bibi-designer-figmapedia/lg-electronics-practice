@@ -92,3 +92,26 @@
  * are compiled into utility classes. See src/tokens/README.md.
  */
 @import './tokens/design-tokens.css';
+
+/*
+ * Document default family. Tailwind's preflight sets the document family from
+ * `--default-font-family`, which resolves to `--font-sans` — a name the token
+ * layer deliberately does not define (see tokens/typography.tokens.css). So
+ * without this rule the document family resolves to nothing and any text that
+ * carries no `type-*` utility renders in the browser's default font, while the
+ * text next to it that does carry one renders in the Figma family. That split
+ * is silent: no hook, no `verify:tokens`, no typecheck sees it.
+ *
+ * `--font-text` is the body family (Figma's `font-family/text`); the four
+ * title/* styles opt into `--font-headline` through their own `type-*`
+ * utilities, so naming the body family here does not override them. The value
+ * is referenced as a token, never as a family name — this file's @font-face
+ * blocks above are the only place a family name is written, and they must be
+ * because a @font-face descriptor cannot take var().
+ *
+ * Unlayered on purpose: preflight lives in `@layer base`, so an unlayered rule
+ * wins over it without needing !important or a higher specificity selector.
+ */
+body {
+  font-family: var(--font-text);
+}

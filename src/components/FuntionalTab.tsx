@@ -25,25 +25,52 @@ import type { IconPLPName } from './icons/IconPLP'
  *   화살표 아이콘 색       icon/default            --color-icon-default        text-icon-default
  *   밴드 폭                변수 없음, 실측 1920    --container-viewport        max-w-viewport
  *   좌우 인셋              변수 없음, 실측 240     --spacing-viewport-inset    px-viewport-inset
- *   목록 폭                변수 없음, 실측 1440    --container-container       max-w-container
+ *   목록 폭 상한           변수 없음, 실측 1440    --container-container       max-w-container
+ *   칸 사이 간격           변수 없음, 실측 30      --spacing-24                gap-24
  *   화살표 상자            변수 없음, 실측 48      --spacing-48                size-48
  *
  *   새로 만든 토큰 없음. 루트 밴드의 조합(max-w-viewport · border-b-hairline ·
  *   border-border-default · px-viewport-inset · py-24)은 ComponentTitle 의 Case=tab 이
  *   이미 쓰고 있는 것과 같다.
  *
- * 칸 사이 간격에 토큰이 필요 없는 이유
- *   Figma 의 "category icon set"(19661:18760)은 폭 1440 에 justify-between 이고 칸이
- *   7개 × 180 이다. 남는 180 을 6칸으로 나눈 30 은 Figma 가 계산해 낸 결과값이지 값으로
- *   지정된 간격이 아니다. justify-between 을 그대로 쓰면 같은 30 이 나오므로 gap 토큰을
- *   만들지 않았다 — 만들었다면 없는 디자인 결정을 발명하는 것이다.
+ * 좌우 인셋을 이 컴포넌트가 갖는 이유 (확정된 인셋 모델의 full-bleed 갈래)
+ *   인셋 모델에는 갈래가 둘 있다. 일반 섹션은 페이지 래퍼가 px-viewport-inset 을 주고
+ *   컴포넌트는 인셋을 갖지 않는다(PDP 의 contents 가 그렇다). 이 컴포넌트는 그쪽이 아니다 —
+ *   자체 배경(bg/warm)과 아래쪽 구분선이 화면 전체 폭인 full-bleed 밴드이고, 그런 밴드는
+ *   바깥이 폭을 채우면서 배경을 갖고 안쪽 콘텐츠가 인셋을 갖는다. 페이지가 padding 으로
+ *   인셋을 주면 배경과 구분선까지 함께 들어가 밴드가 아니게 된다.
+ *   같은 갈래에 HeaderNotification · Footer · HeroBanner · ComponentTitle 의 Case=tab 이 있고,
+ *   특히 Case=tab 은 이 밴드 바로 위에 놓이므로 둘의 인셋이 같아야 한다(둘 다 240).
  *
- * 화살표가 인셋 밖으로 나가는 것은 원본 그대로다 (좌표로 확인)
- *   get_metadata 기준 좌화살표 152–200 · 목록 240–1680 · 우화살표 1720–1768 이다.
- *   즉 콘텐츠 합(48 + 40 + 1440 + 40 + 48 = 1616)이 인셋 안쪽 폭 1440 보다 넓어서
- *   좌우로 대칭으로 넘친다. px-viewport-inset + justify-center 를 그대로 쓰면 flexbox 가
- *   같은 결과를 낸다 — 화살표를 인셋 안으로 밀어 넣으려고 값을 바꾸지 않았다.
- *   목록에 shrink-0 을 주는 이유가 이것이다. 없으면 목록이 1264 로 줄어 칸 간격이 어긋난다.
+ * 칸 폭과 간격 — 왜 고정 폭이 아니라 균등 분할인가 (요청자 확정)
+ *   Figma 의 "category icon set"(19661:18760)은 폭 1440 안에 칸 7개를 x 0 · 210 · 420 ·
+ *   630 · 840 · 1050 · 1260 으로 놓는다. 칸 폭이 180 이므로 authoring 된 간격은 30 이고
+ *   7 × 180 + 6 × 30 = 1440 으로 프레임에 정확히 들어맞는다.
+ *
+ *   이전 구현은 칸을 180 으로 고정하고 간격을 justify-between 의 남는 공간에 맡겼다. 남는
+ *   공간이 0 이하가 되는 폭(줄 폭이 1260 미만)에서 간격이 0 이 되고, 칸이 맞닿아 이웃한
+ *   설명문이 공백 없이 이어졌다. 간격이 값이 아니라 계산 결과였던 것이 원인이다.
+ *
+ *   그래서 간격을 gap 으로 명시하고 칸은 flex-1 로 균등 분할한다. 실측 30 은 우리 스페이싱
+ *   스케일에 없는 값이고, 없는 값을 위해 스텝을 새로 등재하지 않기로 요청자가 확정했다 —
+ *   가장 가까운 기존 스텝인 24 로 흡수한다. 대가는 1920 기준 칸 폭이 180 에서 185 로 5
+ *   커지는 것이다(글자 블록은 자기 상한 180 을 지키므로 실제 글자 폭은 그대로고, 남는 5 는
+ *   칸 안쪽 여유가 된다). 이 편차는 승인된 것이며 버그로 보고 되돌리지 말 것.
+ *
+ * 화살표가 인셋 밖(거터)에 놓이는 것은 원본 그대로다 (좌표로 확인)
+ *   get_metadata(19661:18858) 실측은 좌화살표 200–248 · 목록 240–1680 · 우화살표 1720–1768
+ *   이다. 즉 화살표는 목록의 1440 밴드 밖, 좌우 240 거터 안에 있다.
+ *   1920 에서 콘텐츠 합은 48 + 40 + 1440 + 40 + 48 = 1616 이고 인셋 안쪽 폭 1440 보다 넓어서
+ *   justify-center 가 좌우로 대칭으로 넘치게 만든다 — 목록 240–1680 · 우화살표 1720–1768 로
+ *   원본과 같고, 넘친 화살표는 240 인셋(거터) 안에 들어간다. 좌화살표만 152–200 으로 원본의
+ *   200–248 보다 48 왼쪽이다. 원본 자체가 비대칭이라(좌화살표 오른쪽 끝 248 이 목록 시작
+ *   240 을 8 침범한다) 우화살표 쪽 간격 40 을 좌우 대칭으로 맞추는 쪽을 택했다. 이 48 은
+ *   남겨둔 차이이고 근사하지 않았다.
+ *   목록에 shrink-0 을 주는 이유가 이것이다. 없으면 목록이 인셋 안쪽 폭에서 화살표 몫
+ *   176 을 뺀 1264 로 줄어들어 1920 에서도 폭 1440 이 나오지 않는다.
+ *   1920 보다 좁아지면 목록은 인셋 안쪽 폭(폭 − 480)을 그대로 쓰고, 칸이 flex-1 이라 줄어든
+ *   폭을 균등하게 나눠 갖는다. 화살표는 계속 인셋 안으로 넘치므로(한쪽 88 ≤ 240) 가로
+ *   스크롤은 생기지 않는다.
  *
  * 화살표 아이콘 — Icon/UI 재사용과 그 대가 (요청자 확정)
  *   Figma 원본은 icon_page_arrow(48 프레임, Arrow_M 벡터, 획 두께 2.5, square cap)라는
@@ -137,12 +164,17 @@ export function FuntionalTab({
       {/* 19661:18808 icon_page_arrow — 원본은 오른쪽 화살표를 뒤집은 인스턴스다. */}
       <PageArrowButton type="arrowLeft" label="Previous categories" onClick={onPrev} />
 
-      {/* 19661:18760 category icon set — 폭 1440 고정, 남는 폭은 justify-between 이 나눈다. */}
-      <ul className="flex w-full max-w-container shrink-0 items-start justify-between">
+      {/* 19661:18760 category icon set — 폭 상한 1440. 칸은 균등 분할이고 간격은 gap-24 다.
+          shrink-0 이 필요한 이유는 아래 "화살표가 인셋 밖(거터)에 놓이는 것" 항목에 있다. */}
+      <ul className="flex w-full max-w-container shrink-0 items-start gap-24">
         {items.map((item, index) => (
           /* Figma 원본의 마지막 두 칸이 라벨까지 똑같아서 라벨만으로는 key 가 유일하지
-             않다. 순서가 곧 정체성인 정적 목록이므로 인덱스를 쓴다(CategoryMenu 선례). */
-          <li key={index}>
+             않다. 순서가 곧 정체성인 정적 목록이므로 인덱스를 쓴다(CategoryMenu 선례).
+
+             칸은 flex-1 로 균등 분할하고 min-w-0 으로 내용 최소폭을 풀어 준다. 폭을 고정하면
+             줄이 좁아질 때 칸이 서로 맞닿는다(아래 "칸 폭과 간격" 참고). 안쪽 글자 블록이
+             자기 상한 180 을 넘지 않으므로 남는 여유는 justify-center 가 칸 안에서 나눈다. */
+          <li key={index} className="flex min-w-0 flex-1 justify-center">
             <FuntionalTabItem
               icon={item.icon}
               label={item.label}

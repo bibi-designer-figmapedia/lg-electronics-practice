@@ -29,7 +29,7 @@ import { IconPLP, type IconPLPName } from './icons/IconPLP'
  *   라벨↔밑줄 간격           변수 없음, 실측 4       --spacing-4              gap-4
  *   밑줄 너비                변수 없음, 실측 18      --spacing-18             w-18
  *   밑줄 두께                변수 없음, 실측 2       --spacing-underline      h-underline
- *   글자 블록 너비           변수 없음, 실측 180     --spacing-180            w-180
+ *   글자 블록 너비 상한      변수 없음, 실측 180     --spacing-180            max-w-180
  *
  *   Primary Color/Black 도 get_variable_defs 에 함께 나오지만 원시 변수이고 text/primary ·
  *   icon/default 와 같은 값으로 해석되므로 역할 토큰 뒤에 그대로 둔다 — IconPLP 가 같은
@@ -122,8 +122,10 @@ export function FuntionalTabItem({
       {/* 19661:19877 Icon/PLP — 크기는 IconPLP 기본값(size-64)이 Figma 와 같다. */}
       <IconPLP name={icon} className={iconStateClasses[state]} aria-hidden />
 
-      {/* 19661:18867 txt — 이 블록이 칸의 폭을 정한다. */}
-      <span className="flex w-180 flex-col items-center gap-8">
+      {/* 19661:18867 txt — 이 블록이 칸의 글자 폭을 정한다. 고정이 아니라 상한이다:
+          Figma 가 authoring 한 180 을 넘지 않으면서, 칸이 그보다 좁아지면 함께 줄어든다.
+          고정 폭이던 때는 칸이 좁아져도 이 블록이 180 을 지켜 이웃 칸과 맞닿았다. */}
+      <span className="flex max-w-180 flex-col items-center gap-8">
         {/* 19661:18868 TabLabel */}
         <span className="flex flex-col items-center gap-4">
           <span className="type-cta-medium w-full text-center text-text-primary">{label}</span>

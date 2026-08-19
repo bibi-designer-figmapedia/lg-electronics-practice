@@ -60,6 +60,25 @@
      a future value the designers set by hand. */
   --spacing-gutter: var(--spacing-24); /* layout/gutter 24 — 그리드 컬럼 간격 */
   --spacing-viewport-inset: 15rem; /* layout/viewport-inset 240 — 뷰포트 좌우 여백 */
+
+  /* Not a `layout/*` variable in Figma: the Default variant of Header/GNB
+     (node-id=19643-30719) puts its Logo/LG at x 92 and its GNBContent at x 240
+     inside the 1920-wide root. get_variable_defs on that node returns no size
+     variable for either (only spacing/40 and spacing/8, which belong to
+     CategoryMenu and RightMenu), so 92 is a measured frame value.
+     A new inset axis, not a duplicate of the two above: viewport-inset (240) is
+     the content container's inset and banner-inset (160) the banner's, and
+     neither describes the GNB bar — the bar deliberately starts its logo
+     further out than the content container does. Nothing in this scale can
+     absorb 92, so it is registered rather than approximated.
+     This replaces the numeric --spacing-92 step that used to carry the value in
+     ./spacing.tokens.css. That step was documented as the logo's *absolute*
+     position (`left-92`); the header no longer positions the logo absolutely —
+     it pads its own root and lets the logo sit first in the flow — so the value
+     is an inset now and belongs here, beside the other two. The old step was
+     removed, and a note stands where it was so it is not re-added.
+     Role-named, which is this file's default rule — no exception needed. */
+  --spacing-gnb-inset: 5.75rem; /* 92 — GNB 바 좌우 인셋 */
   --spacing-banner-inset: 10rem; /* layout/banner-inset 160 — 배너 좌우 여백 */
   --spacing-banner-padding: 5rem; /* layout/banner-padding 80 — 배너 내부 패딩 */
 }

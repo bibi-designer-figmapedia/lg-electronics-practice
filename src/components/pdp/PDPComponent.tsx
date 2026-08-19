@@ -34,7 +34,6 @@ import type { ComponentTitleHeadingLevel } from '../title/ComponentTitle'
  *   Property 1=KeyBenefitPoint (19661:15975)
  *   용도                   Figma 변수 / 실측       코드 토큰                 유틸리티
  *   루트 상하 여백         spacing/48              --spacing-48              py-48
- *   루트 좌우 인셋         spacing/24              --spacing-24              px-24
  *   머리↔항목줄 간격       spacing/20              --spacing-20              gap-20
  *   항목 사이 간격         spacing/24              --spacing-24              gap-24
  *   내용 폭                실측 1440 = container   --container-container     max-w-container
@@ -86,8 +85,17 @@ import type { ComponentTitleHeadingLevel } from '../title/ComponentTitle'
  *      빼도 보이는 결과가 달라지지 않는다.
  *   3. KeyBenefitPoint 루트 폭 1486 과 안쪽 프레임 폭 1438 · 오프셋 -1. container(1440) 에
  *      좌우 인셋 24 를 더하면 1488 이라 2 가 어긋나고, 안쪽도 1440 에서 소수점만큼
- *      어긋난다. Figma 자동 레이아웃의 반올림 산물이라 판단해 폭은 w-full + px-24 +
+ *      어긋난다. Figma 자동 레이아웃의 반올림 산물이라 판단해 폭은 w-full +
  *      max-w-container 로 옮겼다 — 어긋난 2 를 재현하려면 토큰 없는 임의값이 필요하다.
+ *
+ * 루트 좌우 인셋 — 이 컴포넌트는 갖지 않는다 (확정된 인셋 모델)
+ *   Figma 의 KeyBenefitPoint 인스턴스는 폭 1486 에 좌우 padding 24 를 갖고, 그것을 그대로
+ *   px-24 로 옮겨 두었다. 그 결과 페이지가 인셋 240 을 주는 모델에서는 240 + 24 가 겹쳐
+ *   안쪽 컨테이너가 1920 기준 1392 로 나왔다 — Figma 실측 1438 보다 46 좁다.
+ *   인셋은 페이지 래퍼(PDP 의 contents)가 주고 이 컴포넌트는 max-w-container 로 폭 상한만
+ *   갖는다. 그러면 1920 에서 1440 이 되어 실측 1438 과 2 안쪽에서 맞는다 — 그 2 는 위 3번의
+ *   반올림 산물이다. 24 라는 값을 버린 것이 아니라, 같은 인셋을 두 곳에서 더하지 않는다는
+ *   뜻이다. 형제 variant(KeyBenefitSummary)가 이미 같은 형태다.
  */
 
 /* Figma 축 "Property 1". 값 대응은 위 주석의 표가 정본이다. */
@@ -130,8 +138,8 @@ export function PDPComponent({
   if (variant === 'keyBenefitPoint') {
     return (
       <section className={`flex w-full flex-col items-start py-48 ${className}`} {...props}>
-        {/* 19649:32971 Container */}
-        <div className="flex w-full flex-col items-start gap-20 px-24">
+        {/* 19649:32971 Container — 인셋을 갖지 않는다(아래 "루트 좌우 인셋" 항목 참고). */}
+        <div className="flex w-full flex-col items-start gap-20">
           {/* 19661:15712 ComponentTitle Case=Button — 스스로 container 폭으로 좁힌다. */}
           <ComponentTitle
             case="button"

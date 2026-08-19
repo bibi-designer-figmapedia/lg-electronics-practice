@@ -54,7 +54,6 @@ const STEPS: readonly Step[] = [
   ['--spacing-78', 'w-78', 'p-78', false],
   ['--spacing-80', 'w-80', 'p-80', false],
   ['--spacing-82', 'w-82', 'p-82', false],
-  ['--spacing-92', 'w-92', 'p-92', false],
   ['--spacing-96', 'w-96', 'p-96', false],
   ['--spacing-140', 'w-140', 'p-140', false],
   ['--spacing-180', 'w-180', 'p-180', false],

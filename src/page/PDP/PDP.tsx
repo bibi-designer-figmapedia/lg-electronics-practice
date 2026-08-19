@@ -58,6 +58,7 @@ import samplePdpImage from '../../components/pdp/PDPItemImage.sample.png'
  *   | categoryArea 상하 padding | spacing/8 | `py-8` |
  *   | contents 상하 padding | spacing/48 | `py-48` |
  *   | contents 자식 간격 | spacing/48 | `gap-48` |
+ *   | contents 좌우 인셋 | layout/viewport-inset 240 | `px-viewport-inset` |
  *
  *   이 5개가 이 파일이 소비하는 시각 값의 전부다. 색 · 타이포 · 인셋 · 카드 간격은
  *   전부 자식 컴포넌트가 이미 토큰으로 갖고 있어 여기서 다시 지정하지 않는다.
@@ -66,11 +67,37 @@ import samplePdpImage from '../../components/pdp/PDPItemImage.sample.png'
  *   - 페이지 높이 실측 2826. authoring 된 값이 아니라 140 + 2283 + 403 의 합이다.
  *     세로 스택이 그대로 같은 결과를 낸다.
  *   - 183:10015 의 폭 실측 1440 · 183:10016 의 폭 실측 1486. 둘 다 PDPComponent 가
- *     자기 안에서 만드는 값이다 — KeyBenefitSummary 는 `max-w-container`(1440),
- *     KeyBenefitPoint 는 `w-full` + `px-24` 로 컨테이너를 감싼다. 여기서 폭을 다시
- *     걸면 같은 값이 두 곳에 살게 된다.
- *   - contents 의 x 오프셋(240 / 217). 두 자식이 각자 가운데 정렬로 만드는 결과이고,
- *     `items-center` 를 그대로 쓰면 같은 배치가 나온다.
+ *     자기 안에서 `max-w-container` 로 만드는 값이다. 여기서 폭을 다시 걸면 같은 값이
+ *     두 곳에 살게 된다.
+ *
+ * 인셋 모델 — 갈래가 둘이고, 이 페이지는 둘 다 쓴다 (확정 사항)
+ *   1. 일반 섹션. 페이지 래퍼가 px-viewport-inset 을 주고 컴포넌트는 인셋을 갖지 않는다.
+ *      아래 contents 가 이쪽이다.
+ *   2. full-bleed 밴드. 자체 배경 · 구분선이 화면 전체 폭인 밴드는 바깥이 폭을 채우며 배경만
+ *      갖고, 안쪽 콘텐츠가 px-viewport-inset + max-w-container 를 갖는다. 페이지가 padding
+ *      으로 인셋을 주면 배경과 구분선까지 들어가 밴드가 아니게 되기 때문이다.
+ *      아래 categoryArea 의 두 자식(ComponentTitle Case=tab · FuntionalTab)과
+ *      Navigation · Footer · HeroBanner 가 이쪽이고, 그래서 categoryArea 래퍼에는 인셋이 없다.
+ *
+ * contents 의 x 오프셋(240 / 217) — 갈래 1 이므로 인셋은 이 래퍼가 준다
+ *   Figma 의 contents 프레임(폭 1920)이 자식에게 인셋을 직접 준다: 183:10015 는 x 240 폭
+ *   1440, 183:10016 은 x 217 폭 1486 이다(뒤쪽 폭이 46 넓은 것은 위 "옮기지 않은 값" 3번의
+ *   반올림 산물이고, 두 인스턴스의 안쪽 콘텐츠는 같은 240 에서 시작한다).
+ *   이전 구현은 이 인셋을 값으로 갖지 않고 자식의 `mx-auto` + `max-w-container` 가 남기는
+ *   여백에 맡겼다. 폭이 1920 일 때만 240 이 나오고, 1440 이하에서는 여백이 0 이 되어 섹션이
+ *   화면 좌우 끝에 붙었다 — 제목의 첫 글자와 "Read More" 가 화면 경계에 닿는다.
+ *   그래서 인셋을 이 래퍼가 px-viewport-inset 으로 직접 준다. 자식 컴포넌트는 인셋을 갖지
+ *   않고 max-w-container 로 폭 상한만 갖는다.
+ *
+ * 지원 폭은 1600 이상이다 (측정으로 확정한 하한)
+ *   Figma 는 폭 1920 하나만 그린다. 이 구현은 그보다 좁아져도 인셋 모델이 유지되도록 폭을
+ *   상한으로만 걸지만, 하한이 있다 — GNB 내용의 최소 폭이 1465 다.
+ *     92(바 인셋) + 100(로고) + 48(로고↔GNBContent) + 1225(CategoryMenu 806 + RightMenu 419)
+ *   CategoryMenu 와 RightMenu 는 둘 다 내용을 감싸고 줄어들지 않으므로 1225 가 더 줄지 않는다.
+ *   그래서 1465 미만에서는 GNB 가 가로로 넘쳐 페이지에 가로 스크롤이 생기고, 1440 에서는
+ *   "Support" 와 "LG SIGNATURE" 가 맞닿는다. 1600 · 1920 에서는 넘침이 0 이다.
+ *   1465 미만을 지원해야 한다면 그것은 이 페이지가 아니라 두 메뉴 컴포넌트의 축소 규칙을
+ *   Figma 가 정해야 하는 문제다 — 여기서 임의로 인셋을 깎아 맞추지 않는다.
  *
  * heading 레벨을 이 파일에서 정하는 이유
  *   자식 컴포넌트들은 heading 레벨을 prop 으로 열어 두고 기본값 2 를 갖는다. 기본값대로
@@ -309,7 +336,7 @@ export function PDP() {
         </div>
 
         {/* 183:10014 contents */}
-        <div className="flex w-full flex-col items-center gap-48 py-48">
+        <div className="flex w-full flex-col items-center gap-48 px-viewport-inset py-48">
           {/* 183:10015 PDPComponent KeyBenefitSummary — "Read More" 링크를 이미 갖고 있다. */}
           <PDPComponent
             variant="keyBenefitSummary"

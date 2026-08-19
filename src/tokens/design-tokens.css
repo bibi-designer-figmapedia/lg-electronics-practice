@@ -66,8 +66,8 @@
      step for 10. The first coincides exactly with the Disclaimer frame's
      horizontal padding registered in spacing.tokens.css, and that is a
      coincidence — a padding and a blur radius are moved by different
-     decisions. Tying them is the semantic coupling --spacing-92 and
-     --spacing-82 were registered to break.
+     decisions. Tying them is the semantic coupling the header inset tokens
+     (--spacing-gnb-inset, --spacing-82) were registered to break.
 
      Named `disclaimer-glow`, not `disclaimer`, and the difference is load
      bearing. Tailwind resolves `text-<name>` against BOTH the --text-shadow-*

@@ -26,7 +26,7 @@ Figma 변수 → 코드 토큰 대응표. **이 문서는 사본이 아니라 �
 | 색상 gradient (스타일) | 1 | 1 | — | `src/tokens/colors.tokens.css` (`--gradient-badge` + `@utility`) |
 | 타이포 원자 | 13 | 13 | **13** (`--leading-*` 9 + `--text-30` + `--leading-30` + `--text-19` + `--leading-benefit-label`) | `src/tokens/typography.tokens.css` (`@theme`) |
 | 타이포 텍스트 스타일 | 13 | 13 | **2** (`type-cta-large` `type-benefit-label`) | `src/tokens/typography.tokens.css` (`@utility`) |
-| 스페이싱 | 10 | 10 | **21** (`44` `96` `18` `36` `78` `80` `38` `76` `92` `82` `30` `33` `42` `46` `50` `88` `144` `200` `hairline` `underline` `benefit-label`) | `src/tokens/spacing.tokens.css` |
+| 스페이싱 | 10 | 10 | **20** (`44` `96` `18` `36` `78` `80` `38` `76` `82` `30` `33` `42` `46` `50` `88` `144` `200` `hairline` `underline` `benefit-label`) | `src/tokens/spacing.tokens.css` |
 | 레이아웃 | 8 | 8 | — | `src/tokens/layout.tokens.css` |
 | 라디우스 | 6 | 6 | **1** (`16`) | `src/tokens/radius.tokens.css` |
 | border-width | **0** | — | **1** (`hairline`) | `src/tokens/design-tokens.css` — Figma에 스트로크 굵기 변수가 없음 |
@@ -268,7 +268,7 @@ Figma의 `gradient/badge`는 **변수가 아니라 color style**이다. 그라�
 | `--spacing-80` | `5rem` | Button/Web `19649:31393` | 18개 variant 전부에 raw `min-width: 80`. 값은 `--spacing-banner-padding`과 같지만 역할이 달라 별개 토큰 |
 | `--spacing-38` | `2.375rem` | CategoryMenu `19655:33598` | `layout=LeftMenu` 루트 프레임의 고정 높이에 size 변수 미바인딩(`get_variable_defs`가 반환하는 size 변수는 탭 간격 `spacing/40` 하나뿐). Figma 스텝 36↔40 사이 |
 | `--spacing-76` | `4.75rem` | Header/GNB `19655:33547` (`Property 1=secondary` `19661:3965` 안의 `Link`) | 프레임 고정 높이에 size 변수 미바인딩(`get_variable_defs`가 반환하는 size 변수는 좌우 padding `spacing/24` 하나뿐). Figma 스텝 64↔96 사이 |
-| `--spacing-92` | `5.75rem` | Header/GNB `19643:30719` (`Property 1=Default`) | Logo/LG의 절대 x 위치에 size 변수 미바인딩(`get_variable_defs`가 반환하는 size 변수는 `spacing/40`·`spacing/8` 둘뿐이며 각각 탭 간격·아이콘 padding이다). Figma 스텝 80↔96 사이 |
+| ~~`--spacing-92`~~ → `--spacing-gnb-inset` | `5.75rem` | Header/GNB `19643:30719` (`Property 1=Default`) | **숫자 스텝은 제거됐다.** 값(92)은 그대로이고 이름만 옮겼다 — Logo/LG를 `absolute left-92`로 얹던 때는 위치였으나, 지금 GNB는 자기 루트에 padding을 걸고 로고를 흐름 첫 아이템으로 둔다. 즉 위치가 아니라 **인셋**이라 `layout.tokens.css`의 인셋 3개(viewport-inset 240 · gnb-inset 92 · banner-inset 160) 옆으로 갔다. 아래 문단들의 `--spacing-92` 언급은 그 이전 이력이다 |
 | `--spacing-82` | `5.125rem` | Header/GNB `19655:33547` (`Property 1=secondary` `19661:3965` 안의 `Link`) | Link 프레임의 좌우 인셋에 size 변수 미바인딩(`get_variable_defs`가 반환하는 size 변수는 좌우 padding `spacing/24` 하나뿐). Figma 스텝 80↔96 사이 |
 | `--spacing-30` | `1.875rem` | PmaxLayout `19649:32052` (`Disclaimer` `19649:32054`) | 아래 8개 공통 — 이 노드는 size 변수를 **하나도** 바인딩하지 않는다. 고지문 프레임의 좌우 padding |
 | `--spacing-33` | `2.0625rem` | PmaxLayout `19649:32052` (`Logo/LG` `19649:32053`) | 로고 인스턴스의 절대 x·y 위치(상·좌 인셋). 두 축이 같은 값이라 스텝 하나. **결과가 아니라 원인** — 정렬의 잔여값이 아니라 Figma가 직접 적은 위치다 |
@@ -293,15 +293,15 @@ Figma의 `gradient/badge`는 **변수가 아니라 color style**이다. 그라�
 
 **13.667을 `calc()`로 유도하지 않은 것은 의도다.** `16 × (82 / 96)`이 정확히 13.667이라 96 정사각 `Icon/Benefit` 마스터에 그린 16 간격을 82로 줄인 결과처럼 보인다. 그럴듯하지만 **파일에 원본이 16이었다는 근거가 없고**, 식으로 적으면 BenefitRow의 간격이 `--spacing-96`(아이콘 마스터 크기)과 `--spacing-82`(헤더 좌우 인셋)에 묶인다 — `--spacing-92`·`--spacing-82`를 등재해 **끊어낸** 바로 그 의미 결합을 반대 방향으로 다시 만드는 셈이다. 그래서 잰 값을 그대로 등재했다. Figma가 이 관계를 발행하면 그때 재검토한다.
 
-**`--spacing-38`·`--spacing-76`·`--spacing-92`·`--spacing-82`는 숫자 이름이 안전하다.** 위 (a)의 위험이 없기 때문이다 — 넷 다 내장 해석값이 각각 9.5rem·19rem·23rem·20.5rem이라 의도적으로 쓸 일이 없는 희소 고역대이고, 등재 직전 저장소 전수 grep에서 `*-38`·`*-76`·`*-82` 사용처가 0건, `*-92`는 위험을 설명하는 주석 한 줄뿐이었다. Figma가 authoring하는 값도 그 숫자 자체다.
+**`--spacing-38`·`--spacing-76`·`--spacing-82`는 숫자 이름이 안전하다.** 위 (a)의 위험이 없기 때문이다 — 셋 다 내장 해석값이 각각 9.5rem·19rem·20.5rem이라 의도적으로 쓸 일이 없는 희소 고역대이고, 등재 직전 저장소 전수 grep에서 `*-38`·`*-76`·`*-82` 사용처가 0건, `*-92`는 위험을 설명하는 주석 한 줄뿐이었다. Figma가 authoring하는 값도 그 숫자 자체다.
 
-**`--spacing-92`·`--spacing-82`는 클래스를 줄이려고 만든 것이 아니라 의미 결합을 끊으려고 만들었다.** 두 값은 원래 기존 스텝의 합으로 쓰였다 — `left-80` + `ml-12` = 92, `px-64` + `mx-18` = 82. 수치는 오차 0으로 정확했지만, `--spacing-80`은 `Button/Web`의 `min-width: 80` 제약으로, `--spacing-18`은 `Button/Text` 안 `Icon/UI`의 리사이즈 값으로 등재된 토큰이다. 즉 **헤더 로고 위치가 버튼 최소너비에, 헤더 좌우 인셋이 버튼 아이콘 크기에 묶여 있었다.** 둘 중 하나가 자기 사유로 움직이는 날 헤더가 조용히 따라 움직이는데, 합은 여전히 유효한 CSS라 hook도 `verify:tokens`도 잡지 못한다. 아래 경고 박스의 `h-8` 사고와 같은 무성 실패 계열이며, **값이 같아도 역할이 다르면 나눈다**는 `--spacing-80` ↔ `--spacing-banner-padding` 판단의 반대 방향 적용이다.
+**`--spacing-92`(현재 이름 `--spacing-gnb-inset`)·`--spacing-82`는 클래스를 줄이려고 만든 것이 아니라 의미 결합을 끊으려고 만들었다.** 두 값은 원래 기존 스텝의 합으로 쓰였다 — `left-80` + `ml-12` = 92, `px-64` + `mx-18` = 82. 수치는 오차 0으로 정확했지만, `--spacing-80`은 `Button/Web`의 `min-width: 80` 제약으로, `--spacing-18`은 `Button/Text` 안 `Icon/UI`의 리사이즈 값으로 등재된 토큰이다. 즉 **헤더 로고 위치가 버튼 최소너비에, 헤더 좌우 인셋이 버튼 아이콘 크기에 묶여 있었다.** 둘 중 하나가 자기 사유로 움직이는 날 헤더가 조용히 따라 움직이는데, 합은 여전히 유효한 CSS라 hook도 `verify:tokens`도 잡지 못한다. 아래 경고 박스의 `h-8` 사고와 같은 무성 실패 계열이며, **값이 같아도 역할이 다르면 나눈다**는 `--spacing-80` ↔ `--spacing-banner-padding` 판단의 반대 방향 적용이다.
 
 `--spacing-82`만 의존 방향이 Figma와 반대라는 점은 기록해 둔다. Figma는 `Link`를 폭 1756 고정으로 그리고 1920 안에 가운데 정렬하므로 **그쪽에서 82는 `(1920 − 1756) / 2`의 결과**다. 구현은 이를 뒤집어 인셋을 고정하고 프레임이 남는 폭을 채우게 했다 — 루트가 1920보다 좁아져도 성립해야 하기 때문이다. 코드의 모델에서는 인셋이 원인이고 폭이 결과이므로 이름은 인셋이 받는다. 아래 "토큰화하지 않기로 한 값"의 `19`·`5`와 다른 경우다: 그 둘은 **코드의 모델에서도** 결과였다. Figma가 Link 폭을 변수로 발행하면 이 토큰을 옆에 하나 더 만들지 말고 이 토큰을 재검토한다.
 
 **76과 78이 나란히 놓이는 것은 중복이 아니다.** 값이 2 차이라 눈에는 노이즈처럼 보이지만 출처가 다르다 — 78은 `Button/Promotion` 프레임 높이, 76은 header 바 높이이고 Figma가 둘을 따로 움직인다. 합치면 우연을 규칙으로 굳히는 것이 된다(값이 같아도 역할이 다르면 나누는 `--spacing-80` ↔ `--spacing-banner-padding`과 같은 판단이며, 여기는 값마저 다르다). 다만 이 고역대에 세 번째 이웃이 생기면 그것은 "실측 스텝을 더 쌓을 때가 아니라 Figma에 실제 스케일이 필요하다"는 신호다.
 
-> **그 조건은 이미 발동했다.** `--spacing-82`·`--spacing-92` 등재로 이 고역대는 **76 · 78 · 80 · 82 · 92 · 96** 여섯 개가 됐다. 이것은 등재를 막는 사유가 아니다 — 등재하지 않는 쪽의 대안은 "토큰이 적은 상태"가 아니라 "헤더 두 값이 버튼 두 토큰에 조용히 의존하는 상태"였다. 다만 실측 스텝을 이 이상 쌓기 전에 **디자이너에게 이 구간의 실제 스케일을 요청해야 한다**는 신호이며, 아래 [후속 과제](#후속-과제) 8번으로 옮겼다.
+> **그 조건은 이미 발동했다.** `--spacing-82`·`--spacing-92` 등재로 이 고역대는 한때 **76 · 78 · 80 · 82 · 92 · 96** 여섯 개였다(92가 `--spacing-gnb-inset`으로 옮겨간 뒤로는 다섯 개다). 이것은 등재를 막는 사유가 아니다 — 등재하지 않는 쪽의 대안은 "토큰이 적은 상태"가 아니라 "헤더 두 값이 버튼 두 토큰에 조용히 의존하는 상태"였다. 다만 실측 스텝을 이 이상 쌓기 전에 **디자이너에게 이 구간의 실제 스케일을 요청해야 한다**는 신호이며, 아래 [후속 과제](#후속-과제) 8번으로 옮겼다.
 
 **PmaxLayout 8개는 "응답의 부재"가 가장 선명한 사례다.** 위 표의 다른 실측 스텝들은 `get_variable_defs`가 size 변수를 **몇 개는** 반환하면서 그 값만 빠뜨린 경우였다(헤더는 `spacing/24`를, CategoryMenu는 `spacing/40`을 반환한다). PmaxLayout(`19649:32052`)은 19개 변수를 반환하는데 **그중 size가 하나도 없다** — 색·타이포·텍스트 스타일뿐이다. 동시에 `get_design_context`는 같은 노드의 색과 폰트를 전부 `var(--...)`로 내면서 위 8개 수치만 맨 리터럴로 낸다. 두 도구의 응답이 같은 방향을 가리키므로 이 8개가 실측값이라는 판정에 추정이 섞이지 않았다.
 
@@ -331,7 +331,7 @@ Figma의 `gradient/badge`는 **변수가 아니라 color style**이다. 그라�
 >
 > 규칙: **컴포넌트에서는 토큰 스텝(4·8·12·16·18·20·24·32·36·38·40·44·48·64·76·78·80·82·92·96)만 쓴다.** 그 외 숫자(`p-5`, `h-10`)는 토큰이 아니며 hook도 잡지 못하므로, 필요하면 Figma에 스텝을 추가하고 토큰을 동기화한다. 아래 [후속 과제](#후속-과제) 2번이 이 구멍을 CSS 레벨에서 닫는 방법이다.
 >
-> 이 목록에서 **18·36·38·44·76·78·80·82·92·96은 Figma 스텝이 아니라 실측 스텝**이다(위 표 참조). 등재 이유가 추적성만이 아니라는 점이 중요하다 — 이름이 없으면 `h-78`은 19.5rem, `h-76`은 19rem, `px-36`은 9rem, `h-38`은 9.5rem, `size-18`은 4.5rem, `left-92`는 23rem, `px-82`는 20.5rem으로 조용히 렌더된다. **스텝 등재가 이 구멍을 닫는 유일한 방법이다.** 반대로 `rounded-*`에는 내장 숫자 폴백이 없어, 토큰이 없으면 CSS가 아예 생성되지 않는다(값이 틀리는 대신 스타일이 없다).
+> 이 목록에서 **18·36·38·44·76·78·80·82·96은 Figma 스텝이 아니라 실측 스텝**이다(위 표 참조). 등재 이유가 추적성만이 아니라는 점이 중요하다 — 이름이 없으면 `h-78`은 19.5rem, `h-76`은 19rem, `px-36`은 9rem, `h-38`은 9.5rem, `size-18`은 4.5rem, `px-82`는 20.5rem으로 조용히 렌더된다(같은 이유로 `--spacing-gnb-inset`이 필요하다 — 이름이 없으면 `px-92`가 23rem이 된다). **스텝 등재가 이 구멍을 닫는 유일한 방법이다.** 반대로 `rounded-*`에는 내장 숫자 폴백이 없어, 토큰이 없으면 CSS가 아예 생성되지 않는다(값이 틀리는 대신 스타일이 없다).
 
 ## 레이아웃 (8)
 
@@ -586,7 +586,7 @@ Figma 가 각 스타일의 `style` 이름을 패밀리에 따라 다르게 적�
 5. **`IconUI`가 기본 크기를 직접 들고 있다** — `IconUI` 루트에 `size-24`가 박혀 있어 호출부에서 `className="size-18"`을 넘겨도 **조용히 24로 렌더된다.** 특이도가 같고 빌드 CSS에서 `.size-24`가 `.size-18`보다 뒤에 나오기 때문이다. hook·typecheck·빌드 어느 것도 잡지 못하는, 위 "숫자 두 체계"와 같은 부류의 무성 실패다. `ButtonText`는 크기를 래퍼가 들고 `IconUI`에 `size-full`을 넘기는 방식으로 우회했다(`.size-full`은 `.size-24` 뒤에 나와 이긴다). 근본 해결은 `IconUI`에서 기본 크기를 떼어 호출부로 옮기는 것이다.
 6. **버튼 3종의 포커스 링이 토큰이 아니다** — Figma에 focus variant가 없어(`Button/Text`의 축은 `default`/`hover` 둘뿐) 발명하지 않았고, 그 결과 브라우저 UA 기본 링에 의존한다. **표시 자체는 있다** — Tailwind v4 preflight가 `outline`을 리셋하지 않아 3개 모두 `:focus-visible`에서 UA 링이 그려지는 것을 헤드리스 렌더로 확인했다(WCAG 2.4.7 충족). 문제는 링 색이 브라우저 값이라 **토큰이 아니고**, 같은 저장소의 `header/Tab.tsx`가 이미 토큰 패턴(`focus-visible:outline-(length:--border-width-hairline) focus-visible:outline-border-focus`)을 쓰고 있어 **포커스 외형이 시스템 안에서 갈린다**는 점이다. 통일하려면 Figma에 focus 디자인이 먼저 있어야 한다 — 지금 코드에서 정하면 Figma에 없는 것을 발명하는 것이다.
 8. **`type="button"` 기본값이 컴포넌트마다 다르다** — `ButtonText`만 설정하고 `Button`·`ButtonPromotion`은 설정하지 않아, 후자 둘은 `<form>` 안에서 submit으로 동작한다. Figma와 무관한 코드 레벨 불일치다.
-7. **토큰 갤러리가 16개만큼 불완전하다** — `Spacing.stories.tsx` · `Radius.stories.tsx` · `Typography.stories.tsx`에 3차 동기화의 신규 토큰 행이 없고, header 작업에서 등재된 `--spacing-38` · `--spacing-underline` · `--spacing-76` · `--spacing-92` · `--spacing-82` 5개도 `Spacing.stories.tsx`에 없다. BenefitRow 작업의 4개(`--spacing-benefit-label` · `--text-19` · `--leading-benefit-label` · `type-benefit-label`)도 마찬가지로 빠져 있다. `Colors.stories.tsx`에도 이번에 등재된 `--color-border-focus-inverse` 행이 없다 — border 스와치 목록이 4개에서 멈춰 있다.
+7. **토큰 갤러리가 16개만큼 불완전하다** — `Spacing.stories.tsx` · `Radius.stories.tsx` · `Typography.stories.tsx`에 3차 동기화의 신규 토큰 행이 없고, header 작업에서 등재된 `--spacing-38` · `--spacing-underline` · `--spacing-76` · `--spacing-82` 4개도 `Spacing.stories.tsx`에 없다. BenefitRow 작업의 4개(`--spacing-benefit-label` · `--text-19` · `--leading-benefit-label` · `type-benefit-label`)도 마찬가지로 빠져 있다. `Colors.stories.tsx`에도 이번에 등재된 `--color-border-focus-inverse` 행이 없다 — border 스와치 목록이 4개에서 멈춰 있다.
 
    **단순 행 추가로 끝나지 않는다.** `Typography.stories.tsx`를 실제로 열어 확인한 함정 2가지:
    - `--leading-*`는 **10개 전부** 빠져 있다. 누락된 행이 아니라 **line-height 섹션 자체가 없다.**

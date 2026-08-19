@@ -130,36 +130,29 @@
      accident. If a third neighbour turns up in this range, that is a signal
      Figma needs a real scale up here rather than more measured steps.
      That condition has since fired: the 82 and 92 steps below fill this range
-     out to 76 78 80 82 92 96. They were still registered — see the 82 step for
+     out to 76 78 80 82 96 (the 92 that also sat here has since moved to
+     ./layout.tokens.css — see the note where its step used to be). They were
+     still registered — see the 82 step for
      why — and the signal is recorded as a follow-up in docs/design-tokens.md. */
   --spacing-76: 4.75rem;
 
-  /* Not a `spacing/*` variable in Figma: the Default variant of Header/GNB
-     (node-id=19643-30719) places its Logo/LG at an absolute x of 92 inside the
-     1920-wide root. get_variable_defs on that node returns text/primary,
-     nav/menu and its font atoms, brand/primary, brand/logo,
-     brand/logo-inverse, brand/secondary, icon/default, bg/warm, border/strong
-     and two size variables — spacing/40 and spacing/8 — neither of which is
-     this position (40 is the tab gap inside CategoryMenu, 8 the icon padding
-     inside RightMenu). So 92 is a measured frame value.
-     It is a cause, not a consequence: Figma authors the logo's x directly
-     rather than deriving it from a centring or a padding, so naming it does
-     not freeze a leftover the way naming the 19 of slack in the 76 step above
-     would. That is the test the 5 and 19 slack values failed.
-     Registered to break a semantic coupling, not just to shorten a class list.
-     The position used to be written as `left-80` + `ml-12`, which sums to
-     exactly 92 with no rounding error — but --spacing-80 is registered as the
-     `min-width: 80` constraint of the Button/Web set and --spacing-12 is a
-     Figma step, so the header's logo position was riding on a button
-     constraint. Each of those two tokens can move for its own documented
-     reason, and the day either does the header shifts silently: the sum stays
-     valid CSS, so neither the hardcode hook nor `verify:tokens` can see it.
-     Same silent-failure mode as the 38, 76, 78 and 96 steps on the built-in
-     scale too: without this name `left-92` resolves to 92 * 0.25rem = 23rem.
-     The numeric name is free — 92 sits in the same sparse upper range as 38
-     and 76, and a repo-wide grep found no `*-92` utility at all (the only
-     match was this hazard described in a HeaderGNB comment). */
-  --spacing-92: 5.75rem;
+  /* There is deliberately no 92 step here any more, and this note is what keeps
+     it from coming back as one.
+     92 is the left inset of the Default Header/GNB bar (node-id=19643-30719),
+     a measured frame value with no Figma variable bound to it. It was
+     registered here as `--spacing-92` while the bar positioned its logo with
+     `absolute left-92`. The bar no longer does: it pads its own root and lets
+     the logo sit first in the flow, so the value is now an *inset* and lives in
+     ./layout.tokens.css as `--spacing-gnb-inset` next to the two insets it
+     belongs beside (viewport-inset 240, banner-inset 160). The numeric step was
+     removed rather than left unreferenced, because a step nothing consumes is a
+     step the next reader spends the value on something unrelated.
+     What the old comment recorded and is still true: 92 must not be written as
+     a sum of existing steps (`left-80` + `ml-12` is exact but ties a header
+     metric to the Button/Web `min-width: 80` constraint and a Figma step), and
+     it must not be left unnamed, because Tailwind's built-in scale resolves an
+     unregistered `*-92` to 92 * 0.25rem without failing. Both hazards are now
+     handled by the role-named token, which is why no numeric step is needed. */
 
   /* Not a `spacing/*` variable in Figma: the left/right inset of the "Link"
      frame of the secondary Header/GNB variant (node-id=19655-33547, inside
@@ -186,7 +179,7 @@
      as a variable, revisit this token rather than adding one beside it.
      Built-in scale would resolve `px-82` to 82 * 0.25rem = 20.5rem. A repo-wide
      grep found no `*-82` utility, so the numeric name is free.
-     With 82 in place this upper range now holds 76 78 80 82 92 96. The 76 step
+     With 82 in place this upper range now holds 76 78 80 82 96. The 76 step
      above says a third neighbour here is a signal that Figma needs a real scale
      up here rather than more measured steps; that threshold is now crossed and
      is recorded as a follow-up in docs/design-tokens.md. It is a signal to take
@@ -501,7 +494,7 @@
      exception applies only to values sitting ON the scale. This scale is whole
      numbers from 4 up; 13.667 is a fraction between the steps 12 and 16 and is
      not a step of anything. A numeric name would also hit the silent-failure
-     mode the 38/76/78/82/92/96 steps document, and hit it in a worse form:
+     mode the 38/76/78/82/96 steps document, and hit it in a worse form:
      Tailwind v4 accepts fractional numbers on its built-in scale, so an
      unregistered `gap-13.667` compiles happily to 13.667 * 0.25rem = 3.417rem
      rather than failing to generate.
@@ -512,8 +505,8 @@
      plausible story and it is only a story: nothing in the file records an
      original 16, and expressing this token as a calc() over those two steps
      would tie a BenefitRow gap to an icon master size and a header inset — the
-     exact semantic coupling --spacing-92 and --spacing-82 were registered to
-     break. If Figma ever publishes the relation, revisit this token.
+     exact semantic coupling the two header inset tokens (--spacing-gnb-inset
+     in ./layout.tokens.css and --spacing-82 above) were registered to break. If Figma ever publishes the relation, revisit this token.
      Emitted as rem like the rest of the scale, not px like the two rule metrics
      above: this is a layout gap, not a drawn line, so it should grow with the
      user's font size and has no crispness requirement. */
